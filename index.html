@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NOOR GLASS - Abdulaziz Sindi 2026</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d47a1">
+    <link rel="apple-touch-icon" href="logo.png">
+
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,7 +17,11 @@
         :root { --primary: #0d47a1; --dark: #121212; --danger: #d32f2f; --success: #2e7d32; --warning: #ed6c02; --gray: #f4f6f9; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding-bottom: 140px; color: #333; }
         
+        /* الهيدر مع اللوجو */
         .app-header { background: var(--dark); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-brand img { height: 35px; width: auto; border-radius: 4px; object-fit: contain; }
+
         .lang-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
@@ -51,8 +59,8 @@
 <body onclick="initAudio()">
 
 <div class="app-header">
-    <div class="header-brand" style="display: flex; align-items: center; gap: 10px;">
-        <img src="logo.png" alt="Logo" style="height: 35px; width: auto; border-radius: 4px;">
+    <div class="header-brand">
+        <img src="./logo.png" alt="Logo">
         <span>NOOR GLASS</span>
     </div>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle">English</button>
