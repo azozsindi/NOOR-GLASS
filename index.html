@@ -221,13 +221,15 @@ function addToInventory() {
     let sku = generateLive(), qty = parseInt(document.getElementById("qty").value) || 1;
     let now = new Date().toLocaleString('en-GB');
     
-    // إرسال البيانات لجوجل شيت تلقائياً
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwIwtUiacTev95MfZJfE9sboN6pXBU9bRI7L6xV4-3cdvMladH-yfwpHcn_u5C0C3hFYA/exec";
+    // الرابط الأخير والرسمي الخاص بك
+    const sheetURL = "https://script.google.com/macros/s/AKfycbzP8HVS4anQh1Vj3tSaL1ij_JrasKvmWZiwZKaljPAHQCTcWNtH2BHKBIwarDEjD3maqQ/exec";
+    
+    // إرسال البيانات بطريقة تضمن وصولها (Plain Text JSON)
     fetch(sheetURL, {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sku: sku, qty: qty, date: now })
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now })
     });
 
     let idx = inventory.findIndex(i => i.sku === sku);
