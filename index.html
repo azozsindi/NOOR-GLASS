@@ -15,92 +15,68 @@
     
     <style>
         :root { 
-            --primary: #0d47a1; 
-            --dark: #121212; 
-            --danger: #d32f2f; 
-            --success: #2e7d32; 
-            --warning: #ed6c02; 
-            --gray: #f4f6f9; 
-            /* تعريف مسافة الأمان العلوية */
+            --primary: #0d47a1; --dark: #121212; --danger: #d32f2f; 
+            --success: #2e7d32; --warning: #ed6c02; --gray: #f4f6f9; 
             --safe-top: env(safe-area-inset-top, 20px);
         }
         
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding-bottom: 140px; color: #333; }
         
-        /* تحديث الهيدر لإضافة مسافة أمان */
         .app-header { 
-            background: var(--dark); 
-            color: white; 
-            padding: var(--safe-top) 15px 15px 15px; /* دفع المحتوى لأسفل */
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            border-bottom: 3px solid var(--primary); 
-            position: sticky; 
-            top: 0; 
-            z-index: 1001; 
+            background: var(--dark); color: white; padding: var(--safe-top) 15px 15px 15px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; 
         }
 
         .header-brand { display: flex; align-items: center; gap: 10px; }
-        .header-brand img { height: 30px; width: auto; border-radius: 4px; object-fit: contain; }
+        .header-brand img { height: 35px; width: auto; display: block; }
 
-        .lang-btn { 
-            background: rgba(255,255,255,0.1); 
-            color: white; 
-            border: 1px solid rgba(255,255,255,0.3); 
-            padding: 6px 12px; 
-            border-radius: 6px; 
-            font-size: 13px; 
-            cursor: pointer; 
-        }
+        .lang-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
 
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            background: white; 
-            display: flex; 
-            border-top: 1px solid #ddd; 
-            z-index: 1000; 
-            padding-bottom: env(safe-area-inset-bottom, 10px); /* أمان لأسفل الشاشة */
-        }
-        
-        /* باقي التنسيقات كما هي في كودك الأصلي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 10px); }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; color: #777; cursor: pointer; border: none; background: none; }
         .nav-item.active { color: var(--primary); font-weight: bold; border-top: 3px solid var(--primary); background: #f0f7ff; }
+        
         .page { display: none; padding: 15px; }
         .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 15px; }
         h2 { font-size: 0.95rem; color: var(--primary); margin: 15px 0 10px 0; border-right: 4px solid var(--primary); padding-right: 10px; }
         [dir="ltr"] h2 { border-right: none; border-left: 4px solid var(--primary); padding-left: 10px; }
+        
         button { background: var(--primary); color: white; border: none; font-weight: bold; border-radius: 8px; padding: 12px; width: 100%; cursor: pointer; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+        
         #reader { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 2px solid var(--primary); }
         .page-footer { text-align: center; margin-top: 25px; padding: 15px 10px; border-top: 1px solid #e0e0e0; color: #666; }
         .footer-dev { font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 6px; }
         .footer-dua { font-size: 12px; font-style: italic; color: #888; line-height: 1.4; }
+        
         .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.8rem; }
         .info-table th, .info-table td { border: 1px solid #eee; padding: 8px; text-align: center; }
         .info-table th { background: #f8f9fa; color: var(--primary); }
+        
         .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .contact-btn { text-decoration: none; color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        
         .inventory-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; border-right: 6px solid var(--primary); background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        [dir="ltr"] .inventory-item { border-right: none; border-left: 6px solid var(--primary); }
         .qty-controls { display: flex; align-items: center; gap: 8px; }
         .edit-btn { width: 28px !important; height: 28px; padding: 0 !important; border-radius: 6px !important; font-size: 16px; }
         .send-btn { width: auto !important; padding: 8px 12px !important; font-size: 11px; background: var(--success); }
         .qty-circle { border: 2px solid var(--primary); min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        
         .guide-box { background: #fdfdfd; border: 1px dashed #ccc; padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; color: #444; }
         .guide-step { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .guide-step b { color: var(--primary); }
+        .update-tag { background: #fff3e0; border: 1px solid var(--warning); padding: 10px; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body onclick="initAudio()">
 
 <div class="app-header">
     <div class="header-brand">
-        <img src="./logo.png" alt="Logo">
+        <img src="logo.png" alt="Logo">
         <span>NOOR GLASS</span>
     </div>
     <button class="lang-btn" onclick="toggleLang()" id="lang-toggle">English</button>
@@ -111,18 +87,22 @@
         <h2 data-i18n="add_item">➕ إضافة صنف جديد</h2>
         <button id="scan-btn" style="background:#333; margin-bottom:10px;" onclick="toggleScanner()">📷 <span data-i18n="open_scanner">فتح ماسح الباركود</span></button>
         <div id="reader"></div>
-        <select id="type" onchange="generateLive()">
-            <option value="BCG">BCG - Blue Cut Green</option>
-            <option value="BCB">BCB - Blue Cut Blue</option>
-            <option value="PGX">PGX - Photochromic</option>
-            <option value="PLY">PLY - Polycarbonate</option>
-            <option value="MCC">MCC - Anti-Reflection (MC)</option>
-            <option value="UCC">UCC - White Lens (UC)</option>
-        </select>
-        <div style="display: flex; gap: 8px;">
-            <select id="sph" onchange="generateLive()"></select>
-            <select id="cyl" onchange="generateLive()"></select>
+        
+        <div id="manual-controls">
+            <select id="type" onchange="clearManualAndGen()">
+                <option value="BCG">BCG - Blue Cut Green</option>
+                <option value="BCB">BCB - Blue Cut Blue</option>
+                <option value="PGX">PGX - Photochromic</option>
+                <option value="PLY">PLY - Polycarbonate</option>
+                <option value="MCC">MCC - Anti-Reflection (MC)</option>
+                <option value="UCC">UCC - White Lens (UC)</option>
+            </select>
+            <div style="display: flex; gap: 8px;">
+                <select id="sph" onchange="clearManualAndGen()"></select>
+                <select id="cyl" onchange="clearManualAndGen()"></select>
+            </div>
         </div>
+
         <div style="text-align: center; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #eee;">
             <div id="sku-text" style="font-family: monospace; font-weight: bold; color: var(--danger); font-size: 1.2rem;">---</div>
             <svg id="barcode-svg"></svg>
@@ -142,28 +122,25 @@
         <button style="background: var(--dark); margin-bottom:15px; color:white;" onclick="exportExcel()" data-i18n="export">📤 تصدير إكسيل</button>
         <div id="inventory-list"></div>
     </div>
-    <div class="page-footer">
-        <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
-    </div>
 </div>
 
 <div id="page-info" class="page">
     <div class="card">
         <h2 style="color: var(--warning);" data-i18n="guide_title">⭐ دليل المستخدم الشامل (How to use)</h2>
         <div class="guide-box">
-            <div class="guide-step" data-i18n="g1"><b>1. إضافة صنف:</b> يمكنك اختيار نوع العدسة والمقاسات يدوياً، أو الضغط على <b>(📷 فتح الماسح)</b> لتصوير الباركود الجاهز، وسيقوم النظام بتعبئة البيانات تلقائياً.</div>
-            <div class="guide-step" data-i18n="g2"><b>2. الحفظ المحلي:</b> بعد اختيار الكمية، اضغط <b>(حفظ في السجل)</b>. هذا الإجراء يحفظ البيانات داخل هاتفك فقط، ليتيح لك مراجعتها وتعديلها قبل الإرسال النهائي.</div>
-            <div class="guide-step" data-i18n="g3"><b>3. تعديل الكمية:</b> اذهب لصفحة <b>(📋 السجل)</b>، ستجد أزرار <b>(+) و (-)</b> بجانب كل صنف. استخدمها لتصحيح أي خطأ في العد.</div>
-            <div class="guide-step" data-i18n="g4"><b>4. الإرسال والحذف:</b> عند التأكد من المقاس والكمية، اضغط زر <b>(📤 إرسال وحذف)</b>. سيتم إرسال الصنف فوراً إلى <b>جوجل شيت</b> وسيختفي من هاتفك لضمان عدم تكرار الإرسال.</div>
-            <div class="guide-step" data-i18n="g5"><b>5. تصدير إكسيل:</b> يمكنك في أي وقت تحميل نسخة احتياطية من الأصناف الموجودة في السجل قبل إرسالها عبر زر <b>(تصدير إكسيل)</b>.</div>
+            <div class="guide-step"><span data-i18n="g1"><b>1. إضافة صنف:</b> يمكنك اختيار نوع العدسة والمقاسات يدوياً، أو الضغط على <b>(📷 فتح الماسح)</b> لتصوير الباركود الجاهز، وسيقوم النظام بتعبئة البيانات تلقائياً.</span></div>
+            <div class="guide-step"><span data-i18n="g2"><b>2. الحفظ المحلي:</b> بعد اختيار الكمية، اضغط <b>(حفظ في السجل)</b>. هذا الإجراء يحفظ البيانات داخل هاتفك فقط، ليتيح لك مراجعتها وتعديلها قبل الإرسال النهائي.</span></div>
+            <div class="guide-step"><span data-i18n="g3"><b>3. تعديل الكمية:</b> اذهب لصفحة <b>(📋 السجل)</b>، ستجد أزرار <b>(+) و (-)</b> بجانب كل صنف. استخدمها لتصحيح أي خطأ في العد.</span></div>
+            <div class="guide-step"><span data-i18n="g4"><b>4. الإرسال والحذف:</b> عند التأكد من المقاس والكمية، اضغط زر <b>(📤 إرسال وحذف)</b>. سيتم إرسال الصنف فوراً إلى <b>جوجل شيت</b> وسيختفي من هاتفك لضمان عدم تكرار الإرسال.</span></div>
+            <div class="guide-step"><span data-i18n="g5"><b>5. تصدير إكسيل:</b> يمكنك في أي وقت تحميل نسخة احتياطية من الأصناف الموجودة في السجل قبل إرسالها عبر زر <b>(تصدير إكسيل)</b>.</span></div>
         </div>
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
         <h2 data-i18n="h_anatomy">1. هيكل الكود (SKU Anatomy)</h2>
-        <p style="font-size:0.85rem;" data-i18n="anatomy_p">كل كود يتكون من 3 أجزاء تفصل بينها شرطة (-): BCG-125-100</p>
-        
+        <p style="font-size:0.85rem;" data-i18n="anatomy_p">كل كود يتكون من النوع والمقاسات مدمجة لسهولة الربط:</p>
+        <div style="background:#eee; padding:10px; text-align:center; font-family:monospace; font-weight:bold; border-radius:5px;">BCGP125M100</div>
+
         <h2 data-i18n="h_table">2. رموز الأنواع</h2>
         <table class="info-table">
             <thead>
@@ -185,6 +162,15 @@
             <li data-i18n="r2"><b>P</b> تعني موجب (+) | <b>M</b> تعني سالب (-).</li>
         </ul>
 
+        <div class="update-tag">
+            <h2 style="margin-top:0; border-right:4px solid var(--warning);" data-i18n="u_title">🆕 تحديثات نظام المصنع 2026</h2>
+            <ul style="font-size:0.85rem; margin:0; padding-right:20px;">
+                <li data-i18n="u1"><b>إزالة الفواصل:</b> تم دمج الكود بالكامل (بدون شرطات) لتسريع عملية الربط بالمستودع.</li>
+                <li data-i18n="u2"><b>المسح الذكي:</b> نظام الكاميرا الآن يدعم قراءة الأكواد المتصلة مباشرة.</li>
+                <li data-i18n="u3"><b>اللغة المزدوجة:</b> دعم كامل للغتين العربية والإنجليزية لجميع التقارير.</li>
+            </ul>
+        </div>
+
         <h2 data-i18n="contact_us">📞 تواصل معنا</h2>
         <div class="contact-grid">
             <a href="tel:0547002821" class="contact-btn" style="background:#2b5a9b;">📞 Call</a>
@@ -192,10 +178,6 @@
             <a href="mailto:info@noorglass.sa" class="contact-btn" style="background:#444; grid-column: span 2;">📧 info@noorglass.sa</a>
             <a href="https://docs.google.com/spreadsheets/d/1EMk7X4k60cguwVm2Jvks8WoIB7J9uEyvkcPdSqZwWlY/edit?usp=sharing" target="_blank" class="contact-btn" style="background:#1d6f42; grid-column: span 2;">📊 Google Sheet</a>
         </div>
-    </div>
-    <div class="page-footer">
-        <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
     </div>
 </div>
 
@@ -211,40 +193,47 @@ let inventory = JSON.parse(localStorage.getItem("noor_glass_final_v2026")) || []
 let html5QrCode = null;
 let audioCtx = null;
 let isScannerRunning = false;
+let scannedSkuOverride = null;
 const sheetURL = "https://script.google.com/macros/s/AKfycbzP8HVS4anQh1Vj3tSaL1ij_JrasKvmWZiwZKaljPAHQCTcWNtH2BHKBIwarDEjD3maqQ/exec";
 
 const i18n = {
     ar: {
         nav_add: "إضافة", nav_list: "السجل", nav_info: "تعليمات", add_item: "➕ إضافة صنف جديد",
         save: "حفظ في السجل المحلي", inventory: "📋 سجل الجرد المحلي", export: "تصدير إكسيل", open_scanner: "فتح الماسح", close_scanner: "إغلاق الكاميرا",
-        h_anatomy: "1. هيكل الكود (SKU Anatomy)", anatomy_p: "كل كود يتكون من 3 أجزاء تفصل بينها شرطة (-):",
+        guide_title: "⭐ دليل المستخدم الشامل (How to use)", h_anatomy: "1. هيكل الكود (SKU Anatomy)", anatomy_p: "كل كود يتكون من النوع والمقاسات مدمجة لسهولة الربط:",
         h_table: "2. رموز الأنواع", t_code: "الرمز", t_meaning: "نوع العدسة", h_reading: "3. كيف تقرأ الأرقام؟",
-        r1: "يتم حذف الفواصل العشرية (مثال: 1.25 تصبح 125)", r2: "P تعني موجب (+) | M تعني سالب (-)",
+        r1: "يتم حذف الفواصل العشرية (مثال: 1.25 تصبح 125).", r2: "P تعني موجب (+) | M تعني سالب (-).",
+        g1: "1. إضافة صنف: يمكنك اختيار نوع العدسة والمقاسات يدوياً، أو الضغط على (📷 فتح الماسح) لتصوير الباركود الجاهز، وسيقوم النظام بتعبئة البيانات تلقائياً.",
+        g2: "2. الحفظ المحلي: بعد اختيار الكمية، اضغط (حفظ في السجل). هذا الإجراء يحفظ البيانات داخل هاتفك فقط، ليتيح لك مراجعتها وتعديلها قبل الإرسال النهائي.",
+        g3: "3. تعديل الكمية: اذهب لصفحة (📋 السجل)، ستجد أزرار (+) و (-) بجانب كل صنف. استخدمها لتصحيح أي خطأ في العد.",
+        g4: "4. الإرسال والحذف: عند التأكد من المقاس والكمية، اضغط زر (📤 إرسال وحذف). سيتم إرسال الصنف فوراً إلى جوجل شيت وسيختفي من هاتفك لضمان عدم تكرار الإرسال.",
+        g5: "5. تصدير إكسيل: يمكنك في أي وقت تحميل نسخة احتياطية من الأصناف الموجودة في السجل قبل إرسالها عبر زر (تصدير إكسيل).",
+        u_title: "🆕 تحديثات نظام المصنع 2026",
+        u1: "إزالة الفواصل: تم دمج الكود بالكامل (بدون شرطات) لتسريع عملية الربط بالمستودع.",
+        u2: "المسح الذكي: نظام الكاميرا الآن يدعم قراءة الأكواد المتصلة مباشرة.",
+        u3: "اللغة المزدوجة: دعم كامل للغتين العربية والإنجليزية لجميع التقارير.",
         contact_us: "📞 تواصل معنا", dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", 
         dua: "(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)",
-        saved_msg: "تم الحفظ محلياً!", send_to_sheet: "إرسال وحذف", sending: "... جارِ الإرسال", 
-        empty: "السجل فارغ", guide_title: "⭐ دليل المستخدم الشامل",
-        g1: "1. إضافة صنف: اختيار يدوي أو عبر الكاميرا لتعبئة المقاسات تلقائياً.",
-        g2: "2. الحفظ المحلي: البيانات تُخزن في هاتفك للمراجعة قبل الرفع.",
-        g3: "3. التعديل: استخدم أزرار (+/-) في السجل لتصحيح الكميات.",
-        g4: "4. الإرسال: اضغط (إرسال وحذف) لرفع البيانات للشيت وتفريغ السجل.",
-        g5: "5. النسخ: تصدير لملف Excel بأي وقت."
+        saved_msg: "تم الحفظ محلياً!", send_to_sheet: "إرسال وحذف", sending: "... جارِ الإرسال", empty: "السجل فارغ"
     },
     en: {
         nav_add: "Add", nav_list: "List", nav_info: "Help", add_item: "➕ Add New Item",
         save: "Save Locally", inventory: "📋 Local Inventory", export: "Export Excel", open_scanner: "Open Scanner", close_scanner: "Close Camera",
-        h_anatomy: "1. SKU Anatomy", anatomy_p: "Each SKU consists of 3 parts separated by dashes (-):",
+        guide_title: "⭐ User Guide", h_anatomy: "1. SKU Anatomy", anatomy_p: "SKU consists of lens type and powers combined:",
         h_table: "2. Type Codes", t_code: "Code", t_meaning: "Lens Type", h_reading: "3. How to read?",
-        r1: "Decimals are removed (e.g., 1.25 becomes 125)", r2: "P means Plus (+) | M means Minus (-)",
+        r1: "Decimals are removed (e.g., 1.25 becomes 125).", r2: "P means Plus (+) | M means Minus (-).",
+        g1: "1. Add Item: Choose lens type and powers manually, or click (📷 Open Scanner) to scan the barcode. The system will fill data automatically.",
+        g2: "2. Local Save: After selecting quantity, click (Save Locally). This keeps data on your phone for review before final sending.",
+        g3: "3. Edit Qty: Go to (📋 List) page to find (+) and (-) buttons to correct any quantity errors.",
+        g4: "4. Send & Delete: Once verified, click (📤 Send & Delete). Data goes to Google Sheets and is removed from phone to prevent duplicates.",
+        g5: "5. Export Excel: You can download a backup of your local records anytime before sending.",
+        u_title: "🆕 Factory System Updates 2026",
+        u1: "Remove Dashes: Codes are now merged (No dashes) for faster warehouse syncing.",
+        u2: "Smart Scan: Camera system now supports reading continuous codes directly.",
+        u3: "Dual Language: Full support for Arabic and English in all reports.",
         contact_us: "📞 Contact Us", dev_by: "System developed by Abdulaziz Sindi 2026", 
         dua: "(O Allah, make my work an intercessor for me)",
-        saved_msg: "Saved locally!", send_to_sheet: "Send & Delete", sending: "Sending...", 
-        empty: "List is Empty", guide_title: "⭐ Comprehensive User Guide",
-        g1: "1. Add Item: Manual selection or via Camera for auto-filling.",
-        g2: "2. Local Save: Data is stored on your phone for review before upload.",
-        g3: "3. Quantity Edit: Use (+/-) buttons in the log to correct counts.",
-        g4: "4. Send & Delete: Tap to upload to Sheet and clear from local log.",
-        g5: "5. Backup: Export your local log to Excel anytime."
+        saved_msg: "Saved locally!", send_to_sheet: "Send & Delete", sending: "Sending...", empty: "List is Empty"
     }
 };
 
@@ -257,7 +246,7 @@ function toggleScanner() {
     if (!isScannerRunning) {
         readerDiv.style.display = 'block';
         html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, 
             (text) => { playBeep(); processCode(text); stopScanner(); }, () => {})
         .then(() => {
             isScannerRunning = true; btn.style.background = "var(--danger)";
@@ -277,14 +266,50 @@ function stopScanner() {
 }
 
 function processCode(code) {
-    let p = code.split('-');
-    if(p.length === 3) {
-        document.getElementById('type').value = p[0];
-        const conv = (s) => (s[0] === 'P' ? '' : '-') + (parseInt(s.substring(1)) / 100).toFixed(2);
-        document.getElementById('sph').value = conv(p[1]);
-        document.getElementById('cyl').value = conv(p[2]);
-        generateLive();
+    let cleanCode = code.trim().replace(/\s+/g, "");
+    const factoryPattern = /^[A-Z]{3}[PM]\d{3}[PM]\d{3}$/;
+
+    if (factoryPattern.test(cleanCode)) {
+        scannedSkuOverride = null;
+        try {
+            let type = cleanCode.substring(0, 3);
+            let sphPart = cleanCode.substring(3, 7);
+            let cylPart = cleanCode.substring(7, 11);
+            if(document.querySelector(`#type option[value="${type}"]`)) {
+                document.getElementById('type').value = type;
+            }
+            const conv = (s) => (s[0] === 'P' ? '' : '-') + (parseInt(s.substring(1)) / 100).toFixed(2);
+            document.getElementById('sph').value = conv(sphPart);
+            document.getElementById('cyl').value = conv(cylPart);
+            generateLive();
+        } catch(e) { useAsGenericCode(cleanCode); }
+    } else {
+        useAsGenericCode(cleanCode);
     }
+}
+
+function useAsGenericCode(code) {
+    scannedSkuOverride = code;
+    document.getElementById("sku-text").innerText = code;
+    JsBarcode("#barcode-svg", code, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
+}
+
+function clearManualAndGen() {
+    scannedSkuOverride = null;
+    generateLive();
+}
+
+function generateLive() {
+    if (scannedSkuOverride) return scannedSkuOverride;
+    const t = document.getElementById("type").value;
+    const f = (v) => {
+        let val = parseFloat(v);
+        return (val >= 0 ? "P" : "M") + Math.abs(val).toFixed(2).replace(".", "");
+    };
+    const sku = `${t}${f(document.getElementById("sph").value)}${f(document.getElementById("cyl").value)}`;
+    document.getElementById("sku-text").innerText = sku;
+    JsBarcode("#barcode-svg", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
+    return sku;
 }
 
 function fillOptions() {
@@ -296,42 +321,14 @@ function fillOptions() {
     s.value = "0.00"; c.value = "0.00";
 }
 
-function generateLive() {
-    const t = document.getElementById("type").value;
-    const f = (v) => (v >= 0 ? "P" : "M") + Math.abs(v).toFixed(2).replace(".","");
-    const sku = `${t}-${f(document.getElementById("sph").value)}-${f(document.getElementById("cyl").value)}`;
-    document.getElementById("sku-text").innerText = sku;
-    JsBarcode("#barcode-svg", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
-    return sku;
-}
-
-async function sendAndRemove(sku, qty, btnElement) {
-    btnElement.disabled = true;
-    btnElement.style.opacity = "0.5";
-    btnElement.innerText = i18n[currentLang].sending;
-    let now = new Date().toLocaleString('en-GB');
-    try {
-        await fetch(sheetURL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now })
-        });
-        inventory = inventory.filter(item => item.sku !== sku);
-        localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
-        renderList();
-        alert(currentLang === 'ar' ? `تم إرسال ${sku} بنجاح وحذفه.` : `Sent ${sku} successfully and removed.`);
-    } catch (e) {
-        alert(currentLang === 'ar' ? "فشل الإرسال، تحقق من الإنترنت." : "Upload failed, check internet.");
-        btnElement.disabled = false; btnElement.style.opacity = "1";
-        btnElement.innerText = i18n[currentLang].send_to_sheet;
-    }
-}
-
 function addToInventory() {
-    let sku = generateLive(), qty = parseInt(document.getElementById("qty").value) || 1;
+    let sku = scannedSkuOverride || generateLive();
+    let qty = parseInt(document.getElementById("qty").value) || 1;
     updateLocalInventory(sku, qty);
     alert(i18n[currentLang].saved_msg);
+    scannedSkuOverride = null;
+    document.getElementById("qty").value = 1;
+    generateLive();
 }
 
 function updateLocalInventory(sku, qtyChange) {
@@ -339,7 +336,6 @@ function updateLocalInventory(sku, qtyChange) {
     let idx = inventory.findIndex(i => i.sku === sku);
     if(idx > -1) { 
         inventory[idx].qty += qtyChange; 
-        inventory[idx].date = now;
         if(inventory[idx].qty <= 0) inventory.splice(idx, 1);
     } else if (qtyChange > 0) { 
         inventory.unshift({ sku, qty: qtyChange, date: now }); 
@@ -347,8 +343,6 @@ function updateLocalInventory(sku, qtyChange) {
     localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
     renderList();
 }
-
-function quickEdit(sku, delta) { updateLocalInventory(sku, delta); }
 
 function renderList() {
     const l = document.getElementById("inventory-list"); l.innerHTML = "";
@@ -358,24 +352,39 @@ function renderList() {
     }
     inventory.forEach((item) => {
         l.innerHTML += `<div class="inventory-item">
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div><b>${item.sku}</b><div style="font-size:10px; color:#999;">⏰ ${item.date}</div></div>
-                    <div class="qty-controls">
-                        <button class="edit-btn" style="background:var(--danger)" onclick="quickEdit('${item.sku}', -1)">-</button>
-                        <div class="qty-circle">${item.qty}</div>
-                        <button class="edit-btn" style="background:var(--success)" onclick="quickEdit('${item.sku}', 1)">+</button>
-                    </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>${item.sku}</b><div style="font-size:10px; color:#999;">⏰ ${item.date}</div></div>
+                <div class="qty-controls">
+                    <button class="edit-btn" style="background:var(--danger); color:white;" onclick="updateLocalInventory('${item.sku}', -1)">-</button>
+                    <div class="qty-circle">${item.qty}</div>
+                    <button class="edit-btn" style="background:var(--success); color:white;" onclick="updateLocalInventory('${item.sku}', 1)">+</button>
                 </div>
-                <button class="send-btn" onclick="sendAndRemove('${item.sku}', ${item.qty}, this)">📤 ${i18n[currentLang].send_to_sheet}</button>
             </div>
+            <button class="send-btn" style="width:100% !important; margin-top:10px;" onclick="sendAndRemove('${item.sku}', ${item.qty}, this)">📤 ${i18n[currentLang].send_to_sheet}</button>
         </div>`;
     });
 }
 
+async function sendAndRemove(sku, qty, btnElement) {
+    btnElement.disabled = true; btnElement.style.opacity = "0.5";
+    btnElement.innerText = i18n[currentLang].sending;
+    let now = new Date().toLocaleString('en-GB');
+    try {
+        await fetch(sheetURL, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now })
+        });
+        inventory = inventory.filter(item => item.sku !== sku);
+        localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
+        renderList();
+    } catch (e) {
+        alert("Network Error!"); btnElement.disabled = false; btnElement.style.opacity = "1";
+    }
+}
+
 function exportExcel() {
-    let d = inventory.map(i => ({ "SKU": i.sku, "Qty": i.qty, "Date": i.date }));
-    let ws = XLSX.utils.json_to_sheet(d); let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.json_to_sheet(inventory); let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inventory"); XLSX.writeFile(wb, "NoorGlass_Backup.xlsx");
 }
 
@@ -391,7 +400,12 @@ function toggleLang() {
     document.getElementById('lang-toggle').innerText = currentLang === 'ar' ? 'English' : 'العربية';
     updateTexts(); renderList();
 }
-function updateTexts() { document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]; }); }
+
+function updateTexts() { 
+    document.querySelectorAll('[data-i18n]').forEach(el => { 
+        el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]; 
+    }); 
+}
 
 fillOptions(); generateLive(); renderList();
 </script>
