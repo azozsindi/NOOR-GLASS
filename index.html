@@ -52,7 +52,15 @@
         .contact-btn { text-decoration: none; color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
         
         .inventory-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; border-right: 6px solid var(--primary); background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .qty-circle { border: 2px solid var(--primary); min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        [dir="ltr"] .inventory-item { border-right: none; border-left: 6px solid var(--primary); }
+        .qty-controls { display: flex; align-items: center; gap: 8px; }
+        .edit-btn { width: 28px !important; height: 28px; padding: 0 !important; border-radius: 6px !important; font-size: 16px; }
+        .send-btn { width: auto !important; padding: 8px 12px !important; font-size: 11px; background: var(--success); }
+        .qty-circle { border: 2px solid var(--primary); min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        
+        .guide-box { background: #fdfdfd; border: 1px dashed #ccc; padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; color: #444; }
+        .guide-step { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .guide-step b { color: var(--primary); }
     </style>
 </head>
 <body onclick="initAudio()">
@@ -68,7 +76,7 @@
 <div id="page-generate" class="page active">
     <div class="card">
         <h2 data-i18n="add_item">➕ إضافة صنف جديد</h2>
-        <button style="background:#333; margin-bottom:10px;" onclick="startScanner()">📷 <span data-i18n="open_scanner">فتح ماسح الباركود</span></button>
+        <button id="scan-btn" style="background:#333; margin-bottom:10px;" onclick="toggleScanner()">📷 <span data-i18n="open_scanner">فتح ماسح الباركود</span></button>
         <div id="reader"></div>
         <select id="type" onchange="generateLive()">
             <option value="BCG">BCG - Blue Cut Green</option>
@@ -87,28 +95,39 @@
             <svg id="barcode-svg"></svg>
         </div>
         <input id="qty" type="number" value="1" min="1">
-        <button onclick="addToInventory()" data-i18n="save">حفظ في المخزون</button>
+        <button onclick="addToInventory()" data-i18n="save">حفظ في السجل المحلي</button>
     </div>
     <div class="page-footer">
         <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div class="footer-dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
+        <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
     </div>
 </div>
 
 <div id="page-list" class="page">
     <div class="card">
-        <h2 data-i18n="inventory">📋 سجل الجرد</h2>
-        <button style="background: var(--success); margin-bottom:15px;" onclick="exportExcel()" data-i18n="export">📤 تصدير إكسيل</button>
+        <h2 data-i18n="inventory">📋 سجل الجرد المحلي</h2>
+        <button style="background: var(--dark); margin-bottom:15px; color:white;" onclick="exportExcel()" data-i18n="export">📤 تصدير إكسيل</button>
         <div id="inventory-list"></div>
     </div>
     <div class="page-footer">
         <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div class="footer-dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
+        <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
     </div>
 </div>
 
 <div id="page-info" class="page">
     <div class="card">
+        <h2 style="color: var(--warning);" data-i18n="guide_title">⭐ دليل المستخدم الشامل (How to use)</h2>
+        <div class="guide-box">
+            <div class="guide-step" data-i18n="g1"><b>1. إضافة صنف:</b> يمكنك اختيار نوع العدسة والمقاسات يدوياً، أو الضغط على <b>(📷 فتح الماسح)</b> لتصوير الباركود الجاهز، وسيقوم النظام بتعبئة البيانات تلقائياً.</div>
+            <div class="guide-step" data-i18n="g2"><b>2. الحفظ المحلي:</b> بعد اختيار الكمية، اضغط <b>(حفظ في السجل)</b>. هذا الإجراء يحفظ البيانات داخل هاتفك فقط، ليتيح لك مراجعتها وتعديلها قبل الإرسال النهائي.</div>
+            <div class="guide-step" data-i18n="g3"><b>3. تعديل الكمية:</b> اذهب لصفحة <b>(📋 السجل)</b>، ستجد أزرار <b>(+) و (-)</b> بجانب كل صنف. استخدمها لتصحيح أي خطأ في العد.</div>
+            <div class="guide-step" data-i18n="g4"><b>4. الإرسال والحذف:</b> عند التأكد من المقاس والكمية، اضغط زر <b>(📤 إرسال وحذف)</b>. سيتم إرسال الصنف فوراً إلى <b>جوجل شيت</b> وسيختفي من هاتفك لضمان عدم تكرار الإرسال.</div>
+            <div class="guide-step" data-i18n="g5"><b>5. تصدير إكسيل:</b> يمكنك في أي وقت تحميل نسخة احتياطية من الأصناف الموجودة في السجل قبل إرسالها عبر زر <b>(تصدير إكسيل)</b>.</div>
+        </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
         <h2 data-i18n="h_anatomy">1. هيكل الكود (SKU Anatomy)</h2>
         <p style="font-size:0.85rem;" data-i18n="anatomy_p">كل كود يتكون من 3 أجزاء تفصل بينها شرطة (-): BCG-125-100</p>
         
@@ -138,11 +157,12 @@
             <a href="tel:0547002821" class="contact-btn" style="background:#2b5a9b;">📞 Call</a>
             <a href="https://wa.me/966547002821" class="contact-btn" style="background:#25D366;">💬 WhatsApp</a>
             <a href="mailto:info@noorglass.sa" class="contact-btn" style="background:#444; grid-column: span 2;">📧 info@noorglass.sa</a>
+            <a href="https://docs.google.com/spreadsheets/d/1EMk7X4k60cguwVm2Jvks8WoIB7J9uEyvkcPdSqZwWlY/edit?usp=sharing" target="_blank" class="contact-btn" style="background:#1d6f42; grid-column: span 2;">📊 Google Sheet</a>
         </div>
     </div>
     <div class="page-footer">
         <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div class="footer-dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
+        <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
     </div>
 </div>
 
@@ -157,35 +177,70 @@ let currentLang = 'ar';
 let inventory = JSON.parse(localStorage.getItem("noor_glass_final_v2026")) || [];
 let html5QrCode = null;
 let audioCtx = null;
+let isScannerRunning = false;
+const sheetURL = "https://script.google.com/macros/s/AKfycbzP8HVS4anQh1Vj3tSaL1ij_JrasKvmWZiwZKaljPAHQCTcWNtH2BHKBIwarDEjD3maqQ/exec";
 
 const i18n = {
     ar: {
         nav_add: "إضافة", nav_list: "السجل", nav_info: "تعليمات", add_item: "➕ إضافة صنف جديد",
-        save: "حفظ في المخزون", inventory: "📋 سجل الجرد", export: "تصدير إكسيل", open_scanner: "فتح الماسح",
+        save: "حفظ في السجل المحلي", inventory: "📋 سجل الجرد المحلي", export: "تصدير إكسيل", open_scanner: "فتح الماسح", close_scanner: "إغلاق الكاميرا",
         h_anatomy: "1. هيكل الكود (SKU Anatomy)", anatomy_p: "كل كود يتكون من 3 أجزاء تفصل بينها شرطة (-):",
         h_table: "2. رموز الأنواع", t_code: "الرمز", t_meaning: "نوع العدسة", h_reading: "3. كيف تقرأ الأرقام؟",
         r1: "يتم حذف الفواصل العشرية (مثال: 1.25 تصبح 125)", r2: "P تعني موجب (+) | M تعني سالب (-)",
-        contact_us: "📞 تواصل معنا", dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", saved_msg: "تم الحفظ بنجاح!"
+        contact_us: "📞 تواصل معنا", dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", 
+        dua: "(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)",
+        saved_msg: "تم الحفظ محلياً!", send_to_sheet: "إرسال وحذف", sending: "... جارِ الإرسال", 
+        empty: "السجل فارغ", guide_title: "⭐ دليل المستخدم الشامل",
+        g1: "1. إضافة صنف: اختيار يدوي أو عبر الكاميرا لتعبئة المقاسات تلقائياً.",
+        g2: "2. الحفظ المحلي: البيانات تُخزن في هاتفك للمراجعة قبل الرفع.",
+        g3: "3. التعديل: استخدم أزرار (+/-) في السجل لتصحيح الكميات.",
+        g4: "4. الإرسال: اضغط (إرسال وحذف) لرفع البيانات للشيت وتفريغ السجل.",
+        g5: "5. النسخ: تصدير لملف Excel بأي وقت."
     },
     en: {
-        nav_add: "Add", nav_list: "List", nav_info: "Info", add_item: "➕ Add New Item",
-        save: "Save Item", inventory: "📋 Inventory Log", export: "Export Excel", open_scanner: "Open Scanner",
+        nav_add: "Add", nav_list: "List", nav_info: "Help", add_item: "➕ Add New Item",
+        save: "Save Locally", inventory: "📋 Local Inventory", export: "Export Excel", open_scanner: "Open Scanner", close_scanner: "Close Camera",
         h_anatomy: "1. SKU Anatomy", anatomy_p: "Each SKU consists of 3 parts separated by dashes (-):",
         h_table: "2. Type Codes", t_code: "Code", t_meaning: "Lens Type", h_reading: "3. How to read?",
         r1: "Decimals are removed (e.g., 1.25 becomes 125)", r2: "P means Plus (+) | M means Minus (-)",
-        contact_us: "📞 Contact Us", dev_by: "System developed by Abdulaziz Sindi 2026", saved_msg: "Saved successfully!"
+        contact_us: "📞 Contact Us", dev_by: "System developed by Abdulaziz Sindi 2026", 
+        dua: "(O Allah, make my work an intercessor for me)",
+        saved_msg: "Saved locally!", send_to_sheet: "Send & Delete", sending: "Sending...", 
+        empty: "List is Empty", guide_title: "⭐ Comprehensive User Guide",
+        g1: "1. Add Item: Manual selection or via Camera for auto-filling.",
+        g2: "2. Local Save: Data is stored on your phone for review before upload.",
+        g3: "3. Quantity Edit: Use (+/-) buttons in the log to correct counts.",
+        g4: "4. Send & Delete: Tap to upload to Sheet and clear from local log.",
+        g5: "5. Backup: Export your local log to Excel anytime."
     }
 };
 
 function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 function playBeep() { if (audioCtx) { let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.1, audioCtx.currentTime); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); } }
 
-function startScanner() {
-    document.getElementById('reader').style.display = 'block';
-    html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-        playBeep(); processCode(text); html5QrCode.stop(); document.getElementById('reader').style.display = 'none';
-    }, () => {});
+function toggleScanner() {
+    const btn = document.getElementById('scan-btn');
+    const readerDiv = document.getElementById('reader');
+    if (!isScannerRunning) {
+        readerDiv.style.display = 'block';
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+            (text) => { playBeep(); processCode(text); stopScanner(); }, () => {})
+        .then(() => {
+            isScannerRunning = true; btn.style.background = "var(--danger)";
+            btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`;
+        });
+    } else { stopScanner(); }
+}
+
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('reader').style.display = 'none';
+            isScannerRunning = false; const btn = document.getElementById('scan-btn');
+            btn.style.background = "#333"; btn.innerHTML = `📷 <span>${i18n[currentLang].open_scanner}</span>`;
+        });
+    }
 }
 
 function processCode(code) {
@@ -217,46 +272,78 @@ function generateLive() {
     return sku;
 }
 
+async function sendAndRemove(sku, qty, btnElement) {
+    btnElement.disabled = true;
+    btnElement.style.opacity = "0.5";
+    btnElement.innerText = i18n[currentLang].sending;
+    let now = new Date().toLocaleString('en-GB');
+    try {
+        await fetch(sheetURL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now })
+        });
+        inventory = inventory.filter(item => item.sku !== sku);
+        localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
+        renderList();
+        alert(currentLang === 'ar' ? `تم إرسال ${sku} بنجاح وحذفه.` : `Sent ${sku} successfully and removed.`);
+    } catch (e) {
+        alert(currentLang === 'ar' ? "فشل الإرسال، تحقق من الإنترنت." : "Upload failed, check internet.");
+        btnElement.disabled = false; btnElement.style.opacity = "1";
+        btnElement.innerText = i18n[currentLang].send_to_sheet;
+    }
+}
+
 function addToInventory() {
     let sku = generateLive(), qty = parseInt(document.getElementById("qty").value) || 1;
-    let now = new Date().toLocaleString('en-GB');
-    
-    // الرابط الأخير والرسمي الخاص بك
-    const sheetURL = "https://script.google.com/macros/s/AKfycbzP8HVS4anQh1Vj3tSaL1ij_JrasKvmWZiwZKaljPAHQCTcWNtH2BHKBIwarDEjD3maqQ/exec";
-    
-    // إرسال البيانات بطريقة تضمن وصولها (Plain Text JSON)
-    fetch(sheetURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now })
-    });
-
-    let idx = inventory.findIndex(i => i.sku === sku);
-    if(idx > -1) { inventory[idx].qty += qty; inventory[idx].date = now; }
-    else { inventory.unshift({ sku, qty, date: now }); }
-    
-    localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
-    renderList(); 
+    updateLocalInventory(sku, qty);
     alert(i18n[currentLang].saved_msg);
 }
 
+function updateLocalInventory(sku, qtyChange) {
+    let now = new Date().toLocaleString('en-GB');
+    let idx = inventory.findIndex(i => i.sku === sku);
+    if(idx > -1) { 
+        inventory[idx].qty += qtyChange; 
+        inventory[idx].date = now;
+        if(inventory[idx].qty <= 0) inventory.splice(idx, 1);
+    } else if (qtyChange > 0) { 
+        inventory.unshift({ sku, qty: qtyChange, date: now }); 
+    }
+    localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
+    renderList();
+}
+
+function quickEdit(sku, delta) { updateLocalInventory(sku, delta); }
+
 function renderList() {
     const l = document.getElementById("inventory-list"); l.innerHTML = "";
+    if(inventory.length === 0) {
+        l.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${i18n[currentLang].empty}</p>`;
+        return;
+    }
     inventory.forEach((item) => {
         l.innerHTML += `<div class="inventory-item">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div><b>${item.sku}</b><div style="font-size:10px; color:#999;">⏰ ${item.date}</div></div>
-                <div class="qty-circle">${item.qty}</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>${item.sku}</b><div style="font-size:10px; color:#999;">⏰ ${item.date}</div></div>
+                    <div class="qty-controls">
+                        <button class="edit-btn" style="background:var(--danger)" onclick="quickEdit('${item.sku}', -1)">-</button>
+                        <div class="qty-circle">${item.qty}</div>
+                        <button class="edit-btn" style="background:var(--success)" onclick="quickEdit('${item.sku}', 1)">+</button>
+                    </div>
+                </div>
+                <button class="send-btn" onclick="sendAndRemove('${item.sku}', ${item.qty}, this)">📤 ${i18n[currentLang].send_to_sheet}</button>
             </div>
         </div>`;
     });
 }
 
 function exportExcel() {
-    let d = inventory.map(i => ({ "كود العدسة (SKU)": i.sku, "الكمية (Qty)": i.qty, "تاريخ ووقت الجرد": i.date }));
+    let d = inventory.map(i => ({ "SKU": i.sku, "Qty": i.qty, "Date": i.date }));
     let ws = XLSX.utils.json_to_sheet(d); let wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Inventory"); XLSX.writeFile(wb, "NoorGlass_Inventory.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Inventory"); XLSX.writeFile(wb, "NoorGlass_Backup.xlsx");
 }
 
 function showPage(id, btn) {
