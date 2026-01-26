@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" id="main-html">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NOOR GLASS - Abdulaziz Sindi 2026</title>
     
     <link rel="manifest" href="manifest.json">
@@ -14,50 +14,83 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --primary: #0d47a1; --dark: #121212; --danger: #d32f2f; --success: #2e7d32; --warning: #ed6c02; --gray: #f4f6f9; }
+        :root { 
+            --primary: #0d47a1; 
+            --dark: #121212; 
+            --danger: #d32f2f; 
+            --success: #2e7d32; 
+            --warning: #ed6c02; 
+            --gray: #f4f6f9; 
+            /* تعريف مسافة الأمان العلوية */
+            --safe-top: env(safe-area-inset-top, 20px);
+        }
+        
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding-bottom: 140px; color: #333; }
         
-        .app-header { background: var(--dark); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; }
+        /* تحديث الهيدر لإضافة مسافة أمان */
+        .app-header { 
+            background: var(--dark); 
+            color: white; 
+            padding: var(--safe-top) 15px 15px 15px; /* دفع المحتوى لأسفل */
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 3px solid var(--primary); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1001; 
+        }
+
         .header-brand { display: flex; align-items: center; gap: 10px; }
-        .header-brand img { height: 35px; width: auto; border-radius: 4px; object-fit: contain; }
+        .header-brand img { height: 30px; width: auto; border-radius: 4px; object-fit: contain; }
 
-        .lang-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .lang-btn { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.3); 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            cursor: pointer; 
+        }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: white; 
+            display: flex; 
+            border-top: 1px solid #ddd; 
+            z-index: 1000; 
+            padding-bottom: env(safe-area-inset-bottom, 10px); /* أمان لأسفل الشاشة */
+        }
+        
+        /* باقي التنسيقات كما هي في كودك الأصلي */
         .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; color: #777; cursor: pointer; border: none; background: none; }
         .nav-item.active { color: var(--primary); font-weight: bold; border-top: 3px solid var(--primary); background: #f0f7ff; }
-
         .page { display: none; padding: 15px; }
         .page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 15px; }
         h2 { font-size: 0.95rem; color: var(--primary); margin: 15px 0 10px 0; border-right: 4px solid var(--primary); padding-right: 10px; }
         [dir="ltr"] h2 { border-right: none; border-left: 4px solid var(--primary); padding-left: 10px; }
-
         button { background: var(--primary); color: white; border: none; font-weight: bold; border-radius: 8px; padding: 12px; width: 100%; cursor: pointer; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
-        
         #reader { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 2px solid var(--primary); }
-        
         .page-footer { text-align: center; margin-top: 25px; padding: 15px 10px; border-top: 1px solid #e0e0e0; color: #666; }
         .footer-dev { font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 6px; }
         .footer-dua { font-size: 12px; font-style: italic; color: #888; line-height: 1.4; }
-
         .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.8rem; }
         .info-table th, .info-table td { border: 1px solid #eee; padding: 8px; text-align: center; }
         .info-table th { background: #f8f9fa; color: var(--primary); }
-
         .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .contact-btn { text-decoration: none; color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        
         .inventory-item { padding: 12px; border-radius: 10px; margin-bottom: 8px; border-right: 6px solid var(--primary); background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         [dir="ltr"] .inventory-item { border-right: none; border-left: 6px solid var(--primary); }
         .qty-controls { display: flex; align-items: center; gap: 8px; }
         .edit-btn { width: 28px !important; height: 28px; padding: 0 !important; border-radius: 6px !important; font-size: 16px; }
         .send-btn { width: auto !important; padding: 8px 12px !important; font-size: 11px; background: var(--success); }
         .qty-circle { border: 2px solid var(--primary); min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-        
         .guide-box { background: #fdfdfd; border: 1px dashed #ccc; padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; color: #444; }
         .guide-step { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .guide-step b { color: var(--primary); }
