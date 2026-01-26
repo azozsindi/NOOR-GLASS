@@ -17,7 +17,6 @@
         :root { --primary: #0d47a1; --dark: #121212; --danger: #d32f2f; --success: #2e7d32; --warning: #ed6c02; --gray: #f4f6f9; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding-bottom: 140px; color: #333; }
         
-        /* الهيدر مع اللوجو */
         .app-header { background: var(--dark); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; }
         .header-brand { display: flex; align-items: center; gap: 10px; }
         .header-brand img { height: 35px; width: auto; border-radius: 4px; object-fit: contain; }
@@ -221,11 +220,23 @@ function generateLive() {
 function addToInventory() {
     let sku = generateLive(), qty = parseInt(document.getElementById("qty").value) || 1;
     let now = new Date().toLocaleString('en-GB');
+    
+    // إرسال البيانات لجوجل شيت تلقائياً
+    const sheetURL = "https://script.google.com/macros/s/AKfycbwIwtUiacTev95MfZJfE9sboN6pXBU9bRI7L6xV4-3cdvMladH-yfwpHcn_u5C0C3hFYA/exec";
+    fetch(sheetURL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sku: sku, qty: qty, date: now })
+    });
+
     let idx = inventory.findIndex(i => i.sku === sku);
     if(idx > -1) { inventory[idx].qty += qty; inventory[idx].date = now; }
     else { inventory.unshift({ sku, qty, date: now }); }
+    
     localStorage.setItem("noor_glass_final_v2026", JSON.stringify(inventory));
-    renderList(); alert(i18n[currentLang].saved_msg);
+    renderList(); 
+    alert(i18n[currentLang].saved_msg);
 }
 
 function renderList() {
