@@ -16,433 +16,521 @@
     
     <style>
         :root { 
-            --primary: #0d47a1; --dark: #121212; --danger: #d32f2f; 
-            --success: #2e7d32; --warning: #ed6c02; --gray: #f4f6f9; 
-            --blue-text: #1565c0; 
+            --primary: #0d47a1; --bg-body: #f4f6f9; --bg-card: #ffffff; 
+            --text-main: #333333; --text-sec: #666666; --border: #eeeeee;
+            --input-bg: #fafafa; --shadow: rgba(0,0,0,0.05);
             --safe-top: env(safe-area-inset-top, 20px);
+            --success: #2e7d32; --danger: #d32f2f; --warning: #ed6c02;
         }
-        
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding-bottom: 90px; color: #333; }
-        
-        .app-header { 
-            background: var(--dark); color: white; padding: var(--safe-top) 15px 15px 15px; 
-            display: flex; align-items: center; justify-content: space-between; 
-            border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        [data-theme="dark"] {
+            --primary: #64b5f6; --bg-body: #121212; --bg-card: #1e1e1e;
+            --text-main: #e0e0e0; --text-sec: #aaaaaa; --border: #333333;
+            --input-bg: #2c2c2c; --shadow: rgba(0,0,0,0.5);
+            --success: #81c784; --danger: #e57373; --warning: #ffb74d;
         }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: 0.3s; }
+        
+        .app-header { background: var(--bg-card); color: var(--text-main); padding: var(--safe-top) 15px 15px 15px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px var(--shadow); }
+        .header-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; letter-spacing: 1px; color: var(--primary); font-size: 1.2rem; }
+        .header-brand img { height: 40px; width: auto; display: block; }
 
-        .header-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; letter-spacing: 1px; }
-        .header-brand img { height: 35px; width: auto; display: block; }
-
-        .lang-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: 0.3s; }
-        .lang-btn:active { background: rgba(255,255,255,0.3); }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 5px); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-item { flex: 1; text-align: center; padding: 10px 0; font-size: 10px; color: #777; cursor: pointer; border: none; background: none; transition: 0.2s; }
-        .nav-item span { display: block; margin-top: 4px; font-weight: 500; }
-        .nav-item.active { color: var(--primary); font-weight: bold; background: #f0f7ff; border-top: 3px solid var(--primary); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bg-card); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 5px); }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; font-size: 10px; color: var(--text-sec); cursor: pointer; border: none; background: none; }
+        .nav-item.active { color: var(--primary); font-weight: bold; background: rgba(13, 71, 161, 0.05); border-top: 3px solid var(--primary); }
+        [data-theme="dark"] .nav-item.active { background: rgba(255,255,255,0.05); }
         
         .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
+        .card { background: var(--bg-card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
         h2 { font-size: 1rem; color: var(--primary); margin: 0 0 15px 0; border-right: 4px solid var(--primary); padding-right: 12px; display: flex; align-items: center; }
-        [dir="ltr"] h2 { border-right: none; border-left: 4px solid var(--primary); padding-left: 12px; padding-right: 0; }
+        [dir="ltr"] h2 { border-right: none; border-left: 4px solid var(--primary); padding-left: 12px; }
         
-        button { background: var(--primary); color: white; border: none; font-weight: bold; border-radius: 10px; padding: 14px; width: 100%; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 5px rgba(13, 71, 161, 0.2); transition: 0.2s; }
-        button:active { transform: scale(0.98); }
+        button { background: var(--primary); color: #fff; border: none; font-weight: bold; border-radius: 10px; padding: 14px; width: 100%; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; }
+        [data-theme="dark"] button { color: #000; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; background: #fafafa; }
-        input:focus, select:focus { border-color: var(--primary); outline: none; background: white; }
-        
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main); }
         .reader-div { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); }
         .barcode-box { text-align: center; background: #fff; padding: 15px; border-radius: 10px; border: 1px dashed #ccc; margin: 15px 0; }
         .sku-label { font-family: monospace; font-weight: bold; color: var(--danger); font-size: 1.2rem; word-break: break-all; margin-bottom: 5px; }
 
-        .inventory-item { padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid var(--primary); background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 10px; }
+        .inventory-item { padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid var(--primary); background: var(--bg-card); box-shadow: 0 2px 8px var(--shadow); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
         .qty-controls { display: flex; align-items: center; gap: 10px; }
-        .edit-btn { width: 32px !important; height: 32px; padding: 0 !important; border-radius: 8px !important; font-size: 18px; line-height: 1; }
-        .qty-circle { border: 2px solid var(--primary); min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; cursor: pointer; background: #e3f2fd; color: var(--primary); }
+        .edit-btn { width: 32px !important; height: 32px; padding: 0 !important; border-radius: 8px !important; font-size: 18px; }
+        .qty-circle { border: 2px solid var(--primary); min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; cursor: pointer; background: rgba(13,71,161,0.1); color: var(--primary); }
         
-        /* Home Page Styles */
-        .home-hero { text-align: center; padding: 20px 0; }
-        .home-logo { width: 80px; height: auto; margin-bottom: 10px; }
-        .welcome-text { font-size: 1.2rem; font-weight: bold; color: var(--dark); letter-spacing: 1px; }
-        .date-text { font-size: 0.9rem; color: #777; margin-bottom: 20px; }
+        .time-widget { background: var(--input-bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .time-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .time-row:last-child { border-bottom: none; }
         
-        .update-tag { background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 12px; margin-top: 10px; text-align: right; }
-        [dir="ltr"] .update-tag { text-align: left; }
-        .update-list { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #555; }
-        .update-list li { margin-bottom: 8px; position: relative; padding-right: 15px; }
-        [dir="ltr"] .update-list li { padding-right: 0; padding-left: 15px; }
-        .update-list li::before { content: "•"; color: var(--warning); font-weight: bold; position: absolute; right: 0; }
-        [dir="ltr"] .update-list li::before { right: auto; left: 0; }
+        .event-card { display: flex; align-items: center; background: var(--bg-card); border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 6px var(--shadow); border: 1px solid var(--border); border-right: 5px solid var(--success); }
+        .event-icon { font-size: 2rem; margin-left: 12px; width: 40px; text-align: center; }
+        .event-content { flex: 1; }
+        .event-countdown { background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; min-width: 70px; text-align: center; }
+        [data-theme="dark"] .event-countdown { color: #000; }
 
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .contact-btn { padding: 15px; border-radius: 10px; color: white; text-align: center; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; }
-        .contact-btn:active { transform: scale(0.98); }
-
-        .guide-link { display: block; text-align: center; margin-top: 20px; color: var(--primary); text-decoration: none; cursor: pointer; font-weight: bold; background: #e3f2fd; padding: 12px; border-radius: 8px; }
-
-        /* Guide & Tables */
-        .guide-box { background: #fdfdfd; border: 1px dashed #ccc; padding: 15px; border-radius: 8px; font-size: 0.9rem; line-height: 1.7; color: #444; }
-        .guide-step { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-        .guide-step b { color: var(--primary); display: block; margin-bottom: 3px; font-size: 0.95rem; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; color: var(--text-main); }
+        .info-table th, .info-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .info-table th { background: var(--input-bg); color: var(--primary); }
         
-        .code-example { background:#333; color:#0f0; padding:12px; text-align:center; font-family:monospace; font-weight:bold; border-radius:8px; margin:10px 0; font-size: 1.1rem; letter-spacing: 1px; }
-        .code-desc { text-align:center; font-size:0.75rem; color:#666; margin-bottom:15px; }
+        .guide-box { background: var(--bg-card); border: 1px dashed var(--border); padding: 15px; border-radius: 8px; font-size: 0.9rem; line-height: 1.7; color: var(--text-main); }
+        .guide-step { margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .guide-step b { color: var(--primary); display: block; margin-bottom: 5px; }
 
-        .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
-        .info-table th, .info-table td { border: 1px solid #eee; padding: 10px; text-align: center; }
-        .info-table th { background: #f8f9fa; color: var(--primary); }
-
-        .admin-box { background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px; }
-        .admin-row { display: flex; gap: 5px; margin-bottom: 10px; }
-        .admin-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; background: white; border-radius: 4px; margin-bottom: 4px; }
-        .del-x { color: var(--danger); font-weight: bold; cursor: pointer; padding: 0 5px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-label { font-weight: bold; }
+        .setting-btn { width: auto; margin: 0; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; }
         
-        .section-divider { background: #eee; padding: 8px 15px; font-size: 0.85rem; font-weight: bold; border-radius: 6px; margin: 15px 0 10px 0; color: #555; border-right: 4px solid #999; }
-        [dir="ltr"] .section-divider { border-right: none; border-left: 4px solid #999; }
+        .admin-box { margin-bottom: 20px; padding: 15px; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border); }
+        .admin-row { display: flex; gap: 10px; margin: 10px 0; }
+        .admin-item { display: inline-block; background: var(--bg-card); padding: 5px 10px; border-radius: 15px; margin: 3px; font-size: 0.85rem; border: 1px solid var(--border); }
+        .del-x { color: var(--danger); cursor: pointer; margin-right: 5px; font-weight: bold; }
+        [dir="ltr"] .del-x { margin-right: 0; margin-left: 5px; }
 
-        .page-footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #888; font-size: 0.8rem; }
-        .footer-dev { font-size: 11px; font-weight: bold; color: var(--blue-text); margin-bottom: 6px; }
+        /* Toast Notification */
+        #toast-box { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 2000; left: 50%; transform: translateX(-50%); bottom: 80px; font-size: 16px; opacity: 0; transition: opacity 0.3s, bottom 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #toast-box.show { visibility: visible; opacity: 1; bottom: 90px; }
+        #toast-box.success { background-color: var(--success); }
+        #toast-box.error { background-color: var(--danger); }
+
+        /* Print Style */
+        #print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; direction: rtl; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px; }
+            .print-table th, .print-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        }
     </style>
 </head>
 <body onclick="initAudio()">
+
+<div id="toast-box"></div>
 
 <div class="app-header">
     <div class="header-brand">
         <img src="logo.png" alt="Logo">
         <span>NOOR GLASS</span>
     </div>
-    <button class="lang-btn" onclick="toggleLang()" id="lang-toggle">English</button>
 </div>
 
 <div id="page-home" class="page active">
     <div class="card home-hero">
-        <img src="logo.png" alt="Logo" class="home-logo">
-        <div class="welcome-text" data-i18n="welcome">NOOR GLASS</div>
-        <div class="date-text" id="current-date">---</div>
+        <img src="logo.png" alt="Logo" style="width:80px; margin-bottom:10px;">
+        <div style="font-size:1.2rem; font-weight:bold;">NOOR GLASS</div>
+        <div style="color:var(--text-sec); margin-bottom:15px;" id="current-date">---</div>
+        
+        <div class="time-widget">
+            <div class="time-row">
+                <span style="color:var(--text-sec); font-weight:bold;">🟢 <span data-i18n="current_login">وقت الدخول:</span></span>
+                <span style="color:var(--success); font-family:monospace; font-weight:bold;" id="login-time-span">---</span>
+            </div>
+            <div class="time-row">
+                <span style="color:var(--text-sec); font-weight:bold;">🔴 <span data-i18n="last_visit">آخر زيارة:</span></span>
+                <span style="color:var(--danger); font-family:monospace; font-weight:bold;" id="last-visit-span">---</span>
+            </div>
+        </div>
     </div>
 
     <div class="card">
-        <h2 style="color: var(--warning);" data-i18n="u_title">🆕 آخر التحديثات (27 يناير 2026)</h2>
-        <div class="update-tag">
-            <ul class="update-list">
-                <li data-i18n="u1"><b>إطلاق النظام الشامل:</b> دمج العدسات والفريمات.</li>
-                <li data-i18n="u2"><b>تعديل الكمية المباشر:</b> اضغط على دائرة الرقم لتكتب الكمية فوراً.</li>
-                <li data-i18n="u3"><b>الاهتزاز (Haptic):</b> تأكيد المسح بالاهتزاز.</li>
-                <li data-i18n="u4"><b>نظام الكود الذكي:</b> دعم (P/M) وإزالة الفواصل.</li>
-                <li data-i18n="u5"><b>الفرز التلقائي:</b> فصل التقارير في Google Sheet.</li>
+        <h2 data-i18n="u_title">🆕 آخر التحديثات</h2>
+        <div style="background:rgba(255,193,7,0.1); padding:10px; border-radius:10px; font-size:0.85rem; line-height:1.6; max-height:300px; overflow-y:auto;">
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 تاريخ التحديث: <span id="update-date-text"></span></p>
+            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
+                <li style="margin-bottom:12px;">
+                    <strong>1. نظام جرد الفريمات (Frames Inventory):</strong><br>
+                    تصنيف ذكي (طبي/شمسي) وإمكانية اختيار (الماركة، اللون، وكود المصنع) لإنشاء باركود فريد لكل إطار.
+                </li>
+                <li style="margin-bottom:12px;">
+                    <strong>2. الإدارة الذكية لمقاسات العدسات:</strong><br>
+                    إضافة لوحة تحكم لتحديد نطاق المقاسات (أعلى وأقل مقاس) مع الالتزام بخطوة 0.25 تلقائياً.
+                </li>
+                <li style="margin-bottom:12px;">
+                    <strong>3. تحسينات واجهة المستخدم (UI/UX):</strong><br>
+                    دعم الوضع الليلي (Dark Mode)، تصميم جديد للقائمة السفلية، وتنبيهات فورية (Toasts) ملونة.
+                </li>
+                <li style="margin-bottom:12px;">
+                    <strong>4. الرقابة والتدقيق (Tracking):</strong><br>
+                    سجل دقيق لوقت الدخول وآخر زيارة، مع تسجيل توقيت حفظ كل صنف بالثانية.
+                </li>
+                <li style="margin-bottom:12px;">
+                    <strong>5. تطوير نظام الـ SKU والباركود:</strong><br>
+                    تنسيق احترافي للكود (النوع-المقاس-الإشارة) ودعم طباعة SVG واضحة جداً.
+                </li>
+                <li style="margin-bottom:5px;">
+                    <strong>6. الربط السحابي والنسخ الاحتياطي:</strong><br>
+                    تحسين سرعة الإرسال لـ Google Sheets وتصدير ملفات Excel بتنسيق جاهز للمحاسبة.
+                </li>
             </ul>
         </div>
-        <div class="guide-link" onclick="showPage('page-info', document.getElementById('nav-info-btn'))" data-i18n="open_guide">📖 اضغط هنا لفتح الدليل الشامل للمستخدم</div>
+        <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 فتح الدليل التفصيلي</div>
     </div>
 
     <div class="card">
         <h2 data-i18n="contact_us">📞 تواصل معنا</h2>
-        <div class="contact-grid">
-            <a href="tel:0547002821" class="contact-btn" style="background:#2b5a9b;">📞 Call</a>
-            <a href="https://wa.me/966547002821" class="contact-btn" style="background:#25D366;">💬 WhatsApp</a>
-            <a href="https://docs.google.com/spreadsheets/d/1X3M4uL90E6D8F8VvP_I-nOnz-L3O0_NbeW29qI2TfKk/edit" target="_blank" class="contact-btn" style="background:#1d6f42; grid-column: span 2;">📊 فتح Google Sheet</a>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <a href="tel:0547002821" style="background:#2b5a9b; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">📞 Call</a>
+            <a href="https://wa.me/966547002821" style="background:#25D366; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">💬 WhatsApp</a>
+            <a href="https://docs.google.com/spreadsheets/d/1EMk7X4k60cguwVm2Jvks8WoIB7J9uEyvkcPdSqZwWlY/edit?usp=sharing" target="_blank" style="background:#1d6f42; grid-column:span 2; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">📊 Google Sheet</a>
         </div>
     </div>
-    
-    <div class="page-footer">
-        <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-        <div style="margin-top:5px; font-style:italic;" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
+</div>
+
+<div id="page-extras" class="page">
+    <div class="card">
+        <h2 style="color:var(--success);" data-i18n="events_title">📅 مناسبات هامة (2026)</h2>
+        <div id="events-container"></div>
+    </div>
+    <div class="card">
+        <h2 style="color:var(--primary);" data-i18n="notes_title">📝 دفتر الملاحظات</h2>
+        <textarea id="user-notes" style="width:100%; height:150px; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main);" oninput="saveNotes()"></textarea>
     </div>
 </div>
 
 <div id="page-generate" class="page">
     <div class="card">
         <h2 data-i18n="add_item">➕ جرد العدسات</h2>
-        <button id="scan-btn-lens" style="background:#333; margin-bottom:10px;" onclick="toggleScanner('lens')">📷 <span data-i18n="open_scanner">فتح الماسح</span></button>
+        <button id="scan-btn-lens" style="background:var(--text-main); color:var(--bg-card);" onclick="toggleScanner('lens')">📷 <span data-i18n="open_scanner">Scan</span></button>
         <div id="reader-lens" class="reader-div"></div>
-        <div id="manual-controls">
-            <select id="type" onchange="generateLive('lens')">
-                <option value="BCG" data-sign="P">BCG (P) Blue Cut Green</option>
-                <option value="BCG" data-sign="M">BCG (M) Blue Cut Green</option>
-                <option value="BCB" data-sign="P">BCB (P) Blue Cut Blue</option>
-                <option value="BCB" data-sign="M">BCB (M) Blue Cut Blue</option>
-                <option value="PGX" data-sign="P">PGX (P) Photochromic</option>
-                <option value="PGX" data-sign="M">PGX (M) Photochromic</option>
-                <option value="PLY" data-sign="P">PLY (P) Polycarbonate</option>
-                <option value="PLY" data-sign="M">PLY (M) Polycarbonate</option>
-                <option value="MCC" data-sign="P">MCC (P) Anti-Reflection (MC)</option>
-                <option value="MCC" data-sign="M">MCC (M) Anti-Reflection (MC)</option>
-                <option value="UCC" data-sign="P">UCC (P) White Lens (UC)</option>
-                <option value="UCC" data-sign="M">UCC (M) White Lens (UC)</option>
-            </select>
-            <div style="display: flex; gap: 8px;">
-                <select id="sph" onchange="generateLive('lens')"></select>
-                <select id="cyl" onchange="generateLive('lens')"></select>
-            </div>
+        <select id="type" onchange="generateLive('lens')">
+            <option value="BCG" data-sign="P">BCG (P) Blue Cut Green</option>
+            <option value="BCG" data-sign="M">BCG (M) Blue Cut Green</option>
+            <option value="BCB" data-sign="P">BCB (P) Blue Cut Blue</option>
+            <option value="BCB" data-sign="M">BCB (M) Blue Cut Blue</option>
+            <option value="PGX" data-sign="P">PGX (P) Photochromic</option>
+            <option value="PGX" data-sign="M">PGX (M) Photochromic</option>
+            <option value="PLY" data-sign="P">PLY (P) Polycarbonate</option>
+            <option value="PLY" data-sign="M">PLY (M) Polycarbonate</option>
+            <option value="MCC" data-sign="P">MCC (P) Anti-Reflection</option>
+            <option value="MCC" data-sign="M">MCC (M) Anti-Reflection</option>
+            <option value="UCC" data-sign="P">UCC (P) White Lens</option>
+            <option value="UCC" data-sign="M">UCC (M) White Lens</option>
+        </select>
+        <div style="display:flex; gap:8px;">
+            <select id="sph" onchange="generateLive('lens')"></select>
+            <select id="cyl" onchange="generateLive('lens')"></select>
         </div>
-        <div class="barcode-box">
-            <div id="sku-text-lens" class="sku-label">---</div>
-            <svg id="barcode-svg-lens"></svg>
-        </div>
+        <div class="barcode-box"><div id="sku-text-lens" class="sku-label">---</div><svg id="barcode-svg-lens"></svg></div>
         <input id="qty-lens" type="number" value="1" min="1">
-        <button onclick="addToInventory('lens')" data-i18n="save">حفظ في السجل</button>
+        <button onclick="addToInventory('lens')" data-i18n="save">حفظ</button>
     </div>
 </div>
 
 <div id="page-glasses" class="page">
     <div class="card">
-        <h2 style="color: var(--success);" data-i18n="glass_title">👓 جرد الفريمات</h2>
-        <button id="scan-btn-frame" style="background:#333; margin-bottom:10px;" onclick="toggleScanner('frame')">📷 <span data-i18n="open_scanner">فتح الماسح</span></button>
+        <h2 style="color:var(--success);" data-i18n="glass_title">👓 جرد الفريمات</h2>
+        <button id="scan-btn-frame" style="background:var(--text-main); color:var(--bg-card);" onclick="toggleScanner('frame')">📷 <span data-i18n="open_scanner">Scan</span></button>
         <div id="reader-frame" class="reader-div"></div>
-        
-        <label data-i18n="frame_type_lbl">تصنيف الفريم:</label>
+        <label data-i18n="frame_type_lbl">النوع:</label>
         <select id="glass-type-select" onchange="clearManualAndGen('frame')">
-            <option value="MED" data-i18n="type_med">👓 طبي (Medical)</option>
-            <option value="SUN" data-i18n="type_sun">🕶️ شمسي (Sunglasses)</option>
+            <option value="MED" data-i18n="type_med">👓 طبي</option>
+            <option value="SUN" data-i18n="type_sun">🕶️ شمسي</option>
         </select>
-
         <label data-i18n="brand">الماركة:</label>
         <select id="glass-brand-select" onchange="clearManualAndGen('frame')"></select>
-        
         <label data-i18n="color">اللون:</label>
         <select id="glass-color-select" onchange="clearManualAndGen('frame')"></select>
-        
-        <label data-i18n="factory_code_lbl">كود المصنع (اختياري):</label>
-        <input id="glass-factory-code" type="text" placeholder="..." oninput="clearManualAndGen('frame')">
-
-        <div class="barcode-box">
-            <div id="sku-text-frame" class="sku-label">---</div>
-            <svg id="barcode-svg-frame"></svg>
-        </div>
-        <label data-i18n="quantity">الكمية:</label>
+        <label data-i18n="factory_code_lbl">كود المصنع:</label>
+        <input id="glass-factory-code" type="text" oninput="clearManualAndGen('frame')">
+        <div class="barcode-box"><div id="sku-text-frame" class="sku-label">---</div><svg id="barcode-svg-frame"></svg></div>
         <input id="glass-qty" type="number" value="1" min="1">
-        <button onclick="addToInventory('frame')" style="background: var(--success);" data-i18n="save">حفظ في السجل</button>
+        <button onclick="addToInventory('frame')" style="background:var(--success);" data-i18n="save">حفظ</button>
     </div>
 </div>
 
 <div id="page-list" class="page">
     <div class="card">
-        <h2 data-i18n="inventory">📋 السجلات (للمراجعة)</h2>
-        <button style="background: var(--dark); margin-bottom:15px; color:white;" onclick="exportExcel()" data-i18n="export">📤 تصدير إكسيل للتاكيد</button>
+        <h2 data-i18n="inventory">📋 السجلات</h2>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button style="background:var(--text-main); color:var(--bg-card); flex:1;" onclick="exportExcel()" data-i18n="export">📤 Excel</button>
+            <button style="background:#d32f2f; color:white; flex:1;" onclick="printStyledInvoice()" data-i18n="print_pdf">📄 PDF Print</button>
+        </div>
         <div id="inventory-list"></div>
     </div>
 </div>
 
 <div id="page-info" class="page">
     <div class="card">
-        <h2 style="color: var(--warning);" data-i18n="guide_title">⭐ دليل المستخدم الشامل</h2>
-        
-        <h3 style="margin-top:0; color:#555;">دورة العمل (Workflow):</h3>
+        <h2 style="color:var(--warning);" data-i18n="guide_title">⭐ دليل المستخدم التفصيلي</h2>
         <div class="guide-box">
-            <div class="guide-step"><span data-i18n="g1"><b>1. المسح والإدخال (Scanning):</b> توجه لصفحة (عدسات) أو (فريمات). استخدم الكاميرا لمسح الباركود، أو اختر البيانات يدوياً من القوائم.</span></div>
-            <div class="guide-step"><span data-i18n="g2"><b>2. الحفظ المؤقت (Drafting):</b> عند الضغط على "حفظ"، يتم تخزين البيانات داخل جهازك فقط. هذا يتيح لك العمل بدون إنترنت ومراجعة الأخطاء.</span></div>
-            <div class="guide-step"><span data-i18n="g3"><b>3. المراجعة والتعديل (Review):</b> انتقل لصفحة (السجلات). ستجد كل ما مسحته. اضغط على "الدائرة الملونة" لتعديل الكمية برقم مباشر، أو استخدم (+ / -).</span></div>
-            <div class="guide-step"><span data-i18n="g4"><b>4. الترحيل النهائي (Sync):</b> عند التأكد، اضغط (إرسال وحذف). هذا الإجراء يرسل البيانات للسيرفر ويحذفها من جهازك فوراً لمنع تكرار الجرد.</span></div>
+            <div class="guide-step">
+                <b data-i18n="gd_1_t">1. البداية والإعداد:</b>
+                <span data-i18n="gd_1_d">عند فتح التطبيق لأول مرة، اذهب إلى صفحة "الإعدادات" لضبط اللغة المناسبة، المظهر (ليلي/نهاري)، وإدخال الماركات وألوان الفريمات التي تتعامل معها، بالإضافة لتحديد نطاق مقاسات العدسات.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_2_t">2. جرد العدسات:</b>
+                <span data-i18n="gd_2_d">اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات (SPH/CYL) من القائمة. سيظهر باركود تلقائي. يمكنك مسح الباركود بالكاميرا أو إدخاله يدوياً. اضغط "حفظ" لتخزين العدسة مؤقتاً في الجهاز.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_3_t">3. جرد الفريمات:</b>
+                <span data-i18n="gd_3_d">اختر "طبي" أو "شمسي"، ثم الماركة واللون. يمكنك إضافة "كود المصنع" الموجود على ذراع النظارة لتمييزها بدقة. النظام سينشئ كوداً فريداً لكل نظارة.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_4_t">4. إدارة السجلات:</b>
+                <span data-i18n="gd_4_d">في صفحة "السجلات"، ستجد كل ما قمت بجرده. يمكنك تعديل الكمية بالضغط على الرقم، أو حذف الصنف إذا كانت الكمية 0. تأكد من مراجعة البيانات قبل الإرسال.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_5_t">5. إنهاء الجرد:</b>
+                <span data-i18n="gd_5_d">اضغط على زر "إرسال وحذف" بجانب كل صنف لترحيله إلى ملف Google Sheets وحذفه من هاتفك. يمكنك أيضاً طباعة تقرير PDF أو استخراج ملف Excel كنسخة احتياطية.</span>
+            </div>
         </div>
-
-        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
-
-        <h2 data-i18n="h_anatomy">1. تفكيك كود العدسة (Anatomy)</h2>
-        <p style="font-size:0.85rem;" data-i18n="anatomy_p">يتم توليد الكود بدمج النوع + الإشارة + القوة:</p>
         
+        <h2 data-i18n="h_anatomy">1. هيكل كود العدسة</h2>
+        <p style="font-size:0.85rem;">(النوع + الإشارة + القوة + السلندر)</p>
         <div class="code-example">BCGM000000</div>
-        <div class="code-desc">
-            <span style="color:var(--primary); font-weight:bold;">BCG</span> (النوع) + 
-            <span style="color:var(--danger); font-weight:bold;">M</span> (إشارة القائمة) + 
-            <span style="color:#555;">000000</span> (Sph/Cyl أصفار)
-        </div>
+        
+        <h2 data-i18n="h_anatomy_frame">2. هيكل كود الفريم (Smart SKU)</h2>
+        <p style="font-size:0.85rem;">هو كود ذكي يجمع مواصفات الفريم لتسهيل القراءة:</p>
+        <div class="code-example" style="background:#e3f2fd; color:#0d47a1;">MED + PRADA + GOLD</div>
+        <p style="font-size:0.8rem; margin-top:5px;">(طبي + الماركة + اللون)</p>
 
-        <div class="code-example">PGXPP100P250</div>
-        <div class="code-desc">
-            <span style="color:var(--primary); font-weight:bold;">PGX</span> (النوع) + 
-            <span style="color:var(--success); font-weight:bold;">P</span> (إشارة القائمة) + 
-            <span style="color:#555;">P100</span> (+1.00) + 
-            <span style="color:#555;">P250</span> (+2.50)
-        </div>
-
-        <h2 data-i18n="h_anatomy_frame">2. تفكيك كود الفريم</h2>
-        <p style="font-size:0.85rem;" data-i18n="anatomy_frame_p">سلسلة متصلة بدون فواصل لتسهيل القراءة:</p>
-        <div class="code-example" style="background:#e3f2fd; color:#0d47a1;">SUNGUCCIBLACK88</div>
-        <div class="code-desc">
-            SUN (شمسي) + GUCCI (الماركة) + BLACK (اللون) + 88 (الموديل)
-        </div>
-
-        <h2 data-i18n="h_table">3. جدول رموز العدسات</h2>
+        <h2 data-i18n="h_table">3. جدول المصطلحات الشامل</h2>
         <table class="info-table">
-            <thead>
-                <tr><th data-i18n="t_code">الرمز</th><th data-i18n="t_meaning">نوع العدسة</th><th data-i18n="t_desc">الوصف</th><th data-i18n="t_range">النطاق</th></tr>
-            </thead>
+            <thead><tr><th>الرمز</th><th>المعنى (عربي / انجليزي)</th></tr></thead>
             <tbody>
-                <tr><td>BCG</td><td>Blue Cut Green</td><td>حماية من الضوء الأزرق (عاكس أخضر)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
-                <tr><td>BCB</td><td>Blue Cut Blue</td><td>حماية من الضوء الأزرق (عاكس أزرق)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
-                <tr><td>PGX</td><td>Photochromic</td><td>عدسات متلونة بالشمس (فوتو)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
-                <tr><td>PLY</td><td>Polycarbonate</td><td>ضد الكسر (بولي كربونيت)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
-                <tr><td>MCC</td><td>Anti-Reflection</td><td>عدسات عاكسة للوهج (MC)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
-                <tr><td>UCC</td><td>White Lens</td><td>عدسات بيضاء عادية (UC)</td><td dir="ltr" style="font-weight:bold; color:var(--primary);">P / M</td></tr>
+                <tr><td>P / M</td><td>Plus (+) / Minus (-)</td></tr>
+                <tr><td>BCG</td><td>Blue Cut Green (حماية أزرق - أخضر)</td></tr>
+                <tr><td>BCB</td><td>Blue Cut Blue (حماية أزرق - أزرق)</td></tr>
+                <tr><td>PGX</td><td>Photochromic (فوتو شمسي)</td></tr>
+                <tr><td>PLY</td><td>Polycarbonate (ضد الكسر)</td></tr>
+                <tr><td>MCC</td><td>Anti-Reflection (مقاوم للانعكاس)</td></tr>
+                <tr><td>UCC</td><td>White Lens (عدسة بيضاء عادية)</td></tr>
+                <tr><td>MED</td><td>Medical Frame (فريم طبي)</td></tr>
+                <tr><td>SUN</td><td>Sunglasses (نظارة شمسية)</td></tr>
             </tbody>
         </table>
-        
-        <h2 data-i18n="h_reading">4. قواعد قراءة الأرقام</h2>
-        <div class="guide-box" style="background:#fff3e0; border-color:#ffe0b2;">
-            <ul style="padding-inline-start:20px; margin:0;">
-                <li data-i18n="r1"><b>إلغاء الفواصل العشرية:</b> الأرقام تُقرأ بالمئات. مثال: <b>1.25</b> تصبح <b>125</b>.</li>
-                <li data-i18n="r2"><b>بدائل الإشارات:</b> نظراً لأن بعض أجهزة الباركود لا تقرأ الرموز (-/+)، نستخدم: <br> <b>P</b> = موجب (Plus) <br> <b>M</b> = سالب (Minus).</li>
-            </ul>
-        </div>
-        
-        <div class="page-footer">
-            <div class="footer-dev" data-i18n="dev_by">تم صنع هذا النظام من قبل عبد العزيز سندي 2026</div>
-            <div class="footer-dua" data-i18n="dua">(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)</div>
-        </div>
     </div>
 </div>
 
 <div id="page-admin" class="page">
     <div class="card">
-        <h2 style="color: var(--dark);" data-i18n="admin_title">⚙️ الإعدادات</h2>
+        <h2 data-i18n="admin_general">⚙️ الإعدادات العامة</h2>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="mode_label">المظهر:</span>
+            <button id="setting-theme-btn" class="setting-btn" onclick="toggleTheme()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--border);">🌗</button>
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lang_label">اللغة:</span>
+            <button id="setting-lang-btn" class="setting-btn" onclick="toggleLang()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--border);">English</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="admin_lens_config">📏 إعدادات مقاسات العدسات</h2>
+        <div class="guide-box" style="margin-bottom:15px; font-size:0.8rem; color:var(--text-sec);">
+            <span data-i18n="lens_hint">تحكم في نطاق المقاسات التي تظهر في القوائم.</span>
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lbl_max_pos">أعلى مقاس موجب (+):</span>
+            <input type="number" id="cfg-lens-max" value="6.00" step="0.25" style="width:80px; text-align:center;">
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lbl_max_neg">أعلى مقاس سالب (-):</span>
+            <input type="number" id="cfg-lens-min" value="-6.00" step="0.25" style="width:80px; text-align:center;">
+        </div>
+        <button onclick="updateLensConfig()" style="background:var(--primary); margin-top:10px;" data-i18n="update_lens_range">تحديث النطاق</button>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="admin_inv">👓 إدارة بيانات الفريمات</h2>
         <div class="admin-box">
-            <b data-i18n="m_brands">الماركات:</b>
-            <div class="admin-row"><input id="in-brand" type="text"><button onclick="addItem('brands','in-brand')" style="width:40px;">+</button></div>
+            <b data-i18n="m_brands">1. قائمة الماركات المعتمدة:</b>
+            <div class="admin-row"><input id="in-brand" type="text" placeholder="مثال: RAYBAN"><button onclick="addItem('brands','in-brand')" style="width:40px;">+</button></div>
             <div id="list-brands"></div>
         </div>
         <div class="admin-box">
-            <b data-i18n="m_colors">الألوان:</b>
-            <div class="admin-row"><input id="in-color" type="text"><button onclick="addItem('colors','in-color')" style="width:40px;">+</button></div>
+            <b data-i18n="m_colors">2. قائمة الألوان المعتمدة:</b>
+            <div class="admin-row"><input id="in-color" type="text" placeholder="مثال: GOLD"><button onclick="addItem('colors','in-color')" style="width:40px;">+</button></div>
             <div id="list-colors"></div>
         </div>
     </div>
 </div>
 
+<div id="print-area">
+    <div class="print-header">
+        <img src="logo.png" class="print-logo" style="height:60px;">
+        <div class="print-title" style="font-size:1.5rem; font-weight:bold; color:#0d47a1;">NOOR GLASS INVENTORY</div>
+        <div class="print-meta" style="border-bottom:1px solid #ccc; padding-bottom:10px; margin-bottom:10px;">
+            <span id="print-date"></span> | Generated by Abdulaziz Sindi
+        </div>
+    </div>
+    <table class="print-table">
+        <thead><tr><th>SKU</th><th>Qty</th><th>Type</th></tr></thead>
+        <tbody id="print-body"></tbody>
+    </table>
+</div>
+
 <nav class="bottom-nav">
-    <button id="nav-home-btn" class="nav-item active" onclick="showPage('page-home', this)">🏠 <br><span data-i18n="nav_home">الرئيسية</span></button>
+    <button class="nav-item active" onclick="showPage('page-home', this)">🏠 <br><span data-i18n="nav_home">الرئيسية</span></button>
     <button class="nav-item" onclick="showPage('page-generate', this)">🔍 <br><span data-i18n="nav_add">عدسات</span></button>
     <button class="nav-item" onclick="showPage('page-glasses', this)">👓 <br><span data-i18n="nav_glasses">فريمات</span></button>
     <button class="nav-item" onclick="showPage('page-list', this)">📋 <br><span data-i18n="nav_list">السجلات</span></button>
+    <button class="nav-item" onclick="showPage('page-extras', this)">📅 <br><span data-i18n="nav_extras">مناسبات</span></button>
     <button id="nav-info-btn" class="nav-item" onclick="showPage('page-info', this)">ℹ️ <br><span data-i18n="nav_info">دليل</span></button>
+    <button class="nav-item" onclick="showPage('page-admin', this)">⚙️ <br><span data-i18n="nav_admin">إعدادات</span></button>
 </nav>
 
 <script>
 let currentLang = 'ar';
 let inventory = JSON.parse(localStorage.getItem("noor_glass_v2026_final")) || [];
-let config = JSON.parse(localStorage.getItem("noor_config")) || { brands: ["RAY-BAN", "GUCCI", "PRADA", "TOM FORD"], colors: ["BLACK", "GOLD", "SILVER", "BROWN"] };
-let html5QrCode = null;
-let audioCtx = null;
-let isScannerRunning = false;
-let scannedLensSku = null;
-let scannedFrameSku = null;
+// Default config now includes lens ranges
+let config = JSON.parse(localStorage.getItem("noor_config")) || { 
+    brands: ["RAY-BAN", "GUCCI", "PRADA", "TOM FORD"], 
+    colors: ["BLACK", "GOLD", "SILVER", "BROWN"],
+    lensMax: 6.00,
+    lensMin: -6.00
+};
 
+let html5QrCode = null; let audioCtx = null; let isScannerRunning = false; let scannedLensSku = null; let scannedFrameSku = null;
+let isDarkMode = localStorage.getItem('noor_theme') === 'dark';
+
+if(isDarkMode) document.body.setAttribute('data-theme', 'dark');
+
+// Time Logic
+const now = new Date();
+const nowStr = now.toLocaleString('ar-SA', {weekday:'short', hour:'2-digit', minute:'2-digit'});
+document.getElementById('login-time-span').innerText = nowStr;
+document.getElementById('last-visit-span').innerText = localStorage.getItem("noor_last_visit_time") || "First Visit";
+localStorage.setItem("noor_last_visit_time", nowStr);
+
+document.getElementById('user-notes').value = localStorage.getItem('noor_notes') || "";
 const sheetURL = "https://script.google.com/macros/s/AKfycbyzHsBxSSbqWAT2WVbsVEC-JQ4QRNT7iXskHsQNQLnfVA-XyiFMDblXXsgE65hjzTeUCg/exec";
-
-// تحديث التاريخ في الصفحة الرئيسية
 document.getElementById('current-date').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+document.getElementById('update-date-text').innerText = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const i18n = {
     ar: {
-        nav_home: "الرئيسية", nav_add: "عدسات", nav_glasses: "فريمات", nav_list: "السجلات", nav_info: "دليل", nav_admin: "إعدادات",
-        welcome: "NOOR GLASS", u_title: "🆕 آخر التحديثات (27 يناير 2026)",
-        open_guide: "📖 اضغط هنا لفتح الدليل الشامل للمستخدم",
-        u1: "إطلاق النظام الشامل: دمج العدسات والفريمات.", u2: "تعديل الكمية المباشر: اضغط على الدائرة للكتابة.",
-        u3: "الاهتزاز: تأكيد المسح.", u4: "نظام الكود: (P/M) للعدسات، متصل للفريمات.", u5: "فرز تلقائي: Sheets منفصلة.",
+        nav_home: "الرئيسية", nav_add: "عدسات", nav_glasses: "فريمات", nav_list: "السجلات", nav_info: "دليل", nav_admin: "إعدادات", nav_extras: "مناسبات",
+        welcome: "NOOR GLASS", u_title: "🆕 آخر التحديثات", open_guide: "📖 الدليل التفصيلي",
+        u1: "إطلاق النظام الشامل.", u2: "الوضع الليلي.", u3: "طباعة PDF.", u4: "مناسبات بصرية.",
         add_item: "➕ جرد العدسات", glass_title: "👓 جرد الفريمات", admin_title: "⚙️ الإعدادات",
         brand: "الماركة:", color: "اللون:", quantity: "الكمية:", save: "حفظ في السجل", 
-        inventory: "📋 السجلات (للمراجعة)", export: "تصدير إكسيل للتاكيد", open_scanner: "فتح الماسح", 
-        close_scanner: "إغلاق الكاميرا", saved_msg: "تم الحفظ!", sending: "... جاري الإرسال", 
-        send_to_sheet: "إرسال وحذف من الجهاز", empty: "السجل فارغ", lenses: "العدسات المسجلة", frames: "الفريمات المسجلة",
-        contact_us: "📞 تواصل معنا", m_brands: "الماركات:", m_colors: "الألوان:",
-        frame_type_lbl: "تصنيف الفريم:", type_med: "👓 طبي (Medical)", type_sun: "🕶️ شمسي (Sunglasses)",
-        factory_code_lbl: "كود المصنع (اختياري):",
-        
-        // دليل المستخدم المفصل
-        guide_title: "⭐ الدليل التشغيلي المفصل", 
-        h_anatomy: "1. تفكيك كود العدسة (Anatomy)", anatomy_p: "يتم توليد الكود بدمج النوع + الإشارة + القوة:",
-        h_anatomy_frame: "2. تفكيك كود الفريم", anatomy_frame_p: "سلسلة متصلة بدون فواصل لتسهيل القراءة:",
-        h_table: "3. جدول رموز العدسات", t_code: "الرمز", t_meaning: "نوع العدسة", t_desc: "الوصف", t_range: "النطاق",
-        h_reading: "4. قواعد قراءة الأرقام", 
-        r1: "إلغاء الفواصل العشرية: الأرقام تُقرأ بالمئات. مثال: 1.25 تصبح 125.", 
-        r2: "بدائل الإشارات: نظراً لأن بعض أجهزة الباركود لا تقرأ الرموز (-/+)، نستخدم: P = موجب (Plus) | M = سالب (Minus).",
-        
-        g1: "1. المسح والإدخال (Scanning): توجه لصفحة (عدسات) أو (فريمات). استخدم الكاميرا لمسح الباركود، أو اختر البيانات يدوياً من القوائم.",
-        g2: "2. الحفظ المؤقت (Drafting): عند الضغط على حفظ، يتم تخزين البيانات داخل جهازك فقط. هذا يتيح لك العمل بدون إنترنت ومراجعة الأخطاء.",
-        g3: "3. المراجعة والتعديل (Review): انتقل لصفحة (السجلات). ستجد كل ما مسحته. اضغط على الدائرة الملونة لتعديل الكمية برقم مباشر، أو استخدم (+ / -).",
-        g4: "4. الترحيل النهائي (Sync): عند التأكد، اضغط (إرسال وحذف). هذا الإجراء يرسل البيانات للسيرفر ويحذفها من جهازك فوراً لمنع تكرار الجرد.",
-        
-        dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", 
-        dua: "(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)",
-        enter_new_qty: "أدخل الكمية الجديدة:"
+        inventory: "📋 السجلات", export: "Excel", print_pdf: "طباعة PDF", open_scanner: "فتح الماسح", close_scanner: "إغلاق",
+        saved_msg: "تم الحفظ بنجاح!", sending: "جاري الإرسال...", send_to_sheet: "إرسال وحذف", empty: "السجل فارغ",
+        contact_us: "📞 تواصل معنا", m_brands: "1. قائمة الماركات المعتمدة:", m_colors: "2. قائمة الألوان المعتمدة:",
+        frame_type_lbl: "تصنيف الفريم:", type_med: "👓 طبي", type_sun: "🕶️ شمسي",
+        factory_code_lbl: "كود المصنع (اختياري):", current_login: "وقت الدخول:", last_visit: "آخر زيارة:",
+        events_title: "📅 مناسبات (2026)", notes_title: "📝 دفتر الملاحظات", notes_desc: "حفظ تلقائي:",
+        days_left: "يوم متبقي", 
+        ev_ramadan: "🌙 رمضان 1447", ev_eid_fitr: "🍬 عيد الفطر", ev_eid_adha: "🐑 عيد الأضحى", ev_national: "🇸🇦 اليوم الوطني",
+        ev_mother: "🎁 يوم الأم (21 مارس)", ev_sight: "👁️ يوم البصر (أكتوبر)", ev_diabetes: "🩸 يوم السكري (نوفمبر)",
+        guide_title: "⭐ دليل المستخدم التفصيلي", h_anatomy: "1. هيكل كود العدسة", h_anatomy_frame: "2. هيكل كود الفريم (Smart SKU)", h_table: "3. جدول المصطلحات الشامل", h_reading: "4. قراءة الأرقام",
+        gd_1_t: "1. البداية والإعداد:", gd_1_d: "عند فتح التطبيق لأول مرة، اذهب إلى صفحة 'الإعدادات' لضبط اللغة، المظهر، وإدخال بيانات الفريمات ونطاق العدسات.",
+        gd_2_t: "2. جرد العدسات:", gd_2_d: "اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات. سيظهر باركود تلقائي. اضغط 'حفظ' للتخزين.",
+        gd_3_t: "3. جرد الفريمات:", gd_3_d: "اختر 'طبي' أو 'شمسي'، ثم الماركة واللون. أضف كود المصنع لتمييز النظارة.",
+        gd_4_t: "4. إدارة السجلات:", gd_4_d: "في صفحة السجلات، يمكنك تعديل الكمية أو الحذف. البيانات هنا محفوظة في هاتفك.",
+        gd_5_t: "5. إنهاء الجرد:", gd_5_d: "اضغط 'إرسال وحذف' لترحيل البيانات إلى السحابة وتنظيف جهازك.",
+        dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", dua: "(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)",
+        err_qty: "خطأ: الكمية يجب أن تكون أكبر من 0", saved_sent: "تم الإرسال بنجاح!", err_send: "خطأ في الاتصال، حاول مجدداً",
+        admin_general: "⚙️ الإعدادات العامة", admin_inv: "👓 إدارة بيانات الفريمات", mode_label: "المظهر:", lang_label: "اللغة:", t_light: "☀️ نهاري", t_dark: "🌙 ليلي",
+        admin_lens_config: "📏 إعدادات مقاسات العدسات", lens_hint: "تحكم في نطاق المقاسات التي تظهر في القوائم.",
+        lbl_max_pos: "أعلى مقاس موجب (+):", lbl_max_neg: "أعلى مقاس سالب (-):", update_lens_range: "تحديث نطاق المقاسات",
+        range_updated: "تم تحديث نطاق العدسات!"
     },
     en: {
-        nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin",
-        welcome: "NOOR GLASS", u_title: "🆕 Latest Updates (Jan 27, 2026)",
-        open_guide: "📖 Open Comprehensive User Guide",
-        u1: "System Launch: Lenses & Frames merged.", u2: "Direct Edit: Click circle to type qty.",
-        u3: "Haptic: Scan vibration.", u4: "Smart Code: (P/M) for lenses, No dashes for frames.", u5: "Auto Sort: Separate Sheets.",
+        nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin", nav_extras: "Events",
+        welcome: "NOOR GLASS", u_title: "🆕 Updates", open_guide: "📖 Detailed Guide",
+        u1: "System Launch.", u2: "Dark Mode.", u3: "PDF Print.", u4: "Optical Events.",
         add_item: "➕ Lens Inventory", glass_title: "👓 Frame Inventory", admin_title: "⚙️ Settings",
-        brand: "Brand:", color: "Color:", quantity: "Qty:", save: "Save to List", 
-        inventory: "📋 Records", export: "Export Excel", open_scanner: "Scan", 
-        close_scanner: "Close", saved_msg: "Saved!", sending: "Sending...", 
-        send_to_sheet: "Send & Delete", empty: "Empty", lenses: "Lenses", frames: "Frames",
-        contact_us: "📞 Contact Us", m_brands: "Brands:", m_colors: "Colors:",
+        brand: "Brand:", color: "Color:", quantity: "Qty:", save: "Save", 
+        inventory: "📋 Records", export: "Excel", print_pdf: "Print PDF", open_scanner: "Scan", close_scanner: "Close",
+        saved_msg: "Saved Successfully!", sending: "Sending...", send_to_sheet: "Send & Delete", empty: "Empty", 
+        contact_us: "📞 Contact Us", m_brands: "1. Approved Brands List:", m_colors: "2. Approved Colors List:",
         frame_type_lbl: "Frame Type:", type_med: "👓 Medical", type_sun: "🕶️ Sunglasses",
-        factory_code_lbl: "Factory Code (Optional):",
-        
-        // Detailed Guide
-        guide_title: "⭐ Comprehensive User Guide", 
-        h_anatomy: "1. Lens Code Anatomy", anatomy_p: "Generated by merging Type + Sign + Power:",
-        h_anatomy_frame: "2. Frame Code Anatomy", anatomy_frame_p: "Continuous string without dashes for readability:",
-        h_table: "3. Lens Codes Table", t_code: "Code", t_meaning: "Lens Type", t_desc: "Description", t_range: "Range",
-        h_reading: "4. Reading Numbers Rules", 
-        r1: "Remove Decimals: Numbers are read in hundreds. E.g., 1.25 becomes 125.", 
-        r2: "Sign Alternatives: Since some scanners don't read (-/+), we use: P = Plus | M = Minus.",
-        
-        g1: "1. Scanning & Entry: Go to (Lenses) or (Frames). Use camera to scan barcode or select data manually.",
-        g2: "2. Drafting: Clicking 'Save' stores data locally on your device only. Allows working offline and reviewing errors.",
-        g3: "3. Review & Edit: Go to (Records). Tap the colored circle to type quantity directly, or use (+ / -).",
-        g4: "4. Final Sync: Once verified, click (Send & Delete). This sends data to server and wipes it from device to prevent duplicates.",
-        
-        dev_by: "System developed by Abdulaziz Sindi 2026", 
-        dua: "(O Allah, make my work an intercessor for me)",
-        enter_new_qty: "Enter new quantity:"
+        factory_code_lbl: "Factory Code:", current_login: "Login:", last_visit: "Last:",
+        events_title: "📅 Events (2026)", notes_title: "📝 Notepad", notes_desc: "Auto-saved:",
+        days_left: "Days Left", 
+        ev_ramadan: "🌙 Ramadan", ev_eid_fitr: "🍬 Eid Fitr", ev_eid_adha: "🐑 Eid Adha", ev_national: "🇸🇦 National Day",
+        ev_mother: "🎁 Mother's Day", ev_sight: "👁️ World Sight Day", ev_diabetes: "🩸 Diabetes Day",
+        guide_title: "⭐ Detailed User Guide", h_anatomy: "1. Lens Code", h_anatomy_frame: "2. Frame Code (Smart SKU)", h_table: "3. Complete Terminology", h_reading: "4. Reading Numbers",
+        gd_1_t: "1. Setup:", gd_1_d: "Go to Settings to set Language, Theme, Frame Data, and Lens Power Ranges.",
+        gd_2_t: "2. Lens Inventory:", gd_2_d: "Select Lens Type, Power (SPH/CYL). Scan or auto-generate code. Click Save.",
+        gd_3_t: "3. Frame Inventory:", gd_3_d: "Select Medical/Sun, Brand, and Color. Add Factory Code for precision.",
+        gd_4_t: "4. Records:", gd_4_d: "Edit or Delete items locally before sending.",
+        gd_5_t: "5. Finish:", gd_5_d: "Click 'Send & Delete' to upload data to the cloud and clear your device.",
+        dev_by: "Dev: Abdulaziz Sindi 2026", dua: "(O Allah accept my work)",
+        err_qty: "Error: Qty must be > 0", saved_sent: "Sent Successfully!", err_send: "Connection Error",
+        admin_general: "⚙️ General Settings", admin_inv: "👓 Frame Data Management", mode_label: "Theme:", lang_label: "Language:", t_light: "☀️ Light", t_dark: "🌙 Dark",
+        admin_lens_config: "📏 Lens Size Config", lens_hint: "Control the power range displayed in lists.",
+        lbl_max_pos: "Max Plus Power (+):", lbl_max_neg: "Max Minus Power (-):", update_lens_range: "Update Range",
+        range_updated: "Lens Range Updated!"
     }
 };
 
 function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-function playBeep() { 
-    if (audioCtx) { 
-        let o = audioCtx.createOscillator(), g = audioCtx.createGain(); 
-        o.frequency.value = 880; 
-        g.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-        o.connect(g); g.connect(audioCtx.destination); 
-        o.start(); o.stop(audioCtx.currentTime + 0.1); 
-    } 
-    if (navigator.vibrate) navigator.vibrate(200); 
+function playBeep() { if (audioCtx) { let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.1, audioCtx.currentTime); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); } if (navigator.vibrate) navigator.vibrate(200); }
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById("toast-box");
+    toast.className = "show";
+    if(type === 'error') toast.classList.add("error"); else toast.classList.add("success");
+    toast.innerText = message;
+    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+}
+
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    if(isDarkMode) document.body.setAttribute('data-theme', 'dark'); else document.body.removeAttribute('data-theme');
+    localStorage.setItem('noor_theme', isDarkMode ? 'dark' : 'light');
+    updateSettingsButtons();
+}
+
+function saveNotes() { localStorage.setItem('noor_notes', document.getElementById('user-notes').value); }
+
+function calculateEvents() {
+    const today = new Date();
+    const events = [
+        { key: 'ev_ramadan', date: new Date('2026-02-17') }, { key: 'ev_mother', date: new Date('2026-03-21') },
+        { key: 'ev_eid_fitr', date: new Date('2026-03-19') }, { key: 'ev_eid_adha', date: new Date('2026-05-26') },
+        { key: 'ev_national', date: new Date('2026-09-23') }, { key: 'ev_sight', date: new Date('2026-10-08') },
+        { key: 'ev_diabetes', date: new Date('2026-11-14') }
+    ];
+    let html = '';
+    const lang = currentLang === 'ar' ? 'ar-EG' : 'en-US';
+    events.sort((a,b) => a.date - b.date);
+    events.forEach(e => {
+        const diffTime = e.date - today;
+        if (diffTime > -86400000) {
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const dateStr = e.date.toLocaleDateString(lang, { day: 'numeric', month: 'long' });
+            let badgeClass = 'event-countdown'; if(diffDays < 30) badgeClass += ' near';
+            html += `<div class="event-card"><div class="event-content"><h3 class="event-title" data-i18n="${e.key}"></h3><p class="event-date">${dateStr} 2026</p></div><div class="${badgeClass}">${diffDays} <span data-i18n="days_left"></span></div></div>`;
+        }
+    });
+    document.getElementById('events-container').innerHTML = html;
+    updateTranslations(); 
+}
+
+function printStyledInvoice() {
+    const tbody = document.getElementById('print-body'); tbody.innerHTML = '';
+    document.getElementById('print-date').innerText = new Date().toLocaleString();
+    inventory.forEach(item => {
+        let typeLabel = item.isFrame ? "Frame" : "Lens";
+        tbody.innerHTML += `<tr><td style="font-family:monospace; font-weight:bold;">${item.sku}</td><td>${item.qty}</td><td>${typeLabel}</td></tr>`;
+    });
+    window.print();
 }
 
 function toggleScanner(mode) {
     const btn = document.getElementById(mode === 'lens' ? 'scan-btn-lens' : 'scan-btn-frame');
     const readerDiv = document.getElementById(mode === 'lens' ? 'reader-lens' : 'reader-frame');
     if (!isScannerRunning) {
-        readerDiv.style.display = 'block';
-        html5QrCode = new Html5Qrcode(readerDiv.id);
+        readerDiv.style.display = 'block'; html5QrCode = new Html5Qrcode(readerDiv.id);
         html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
-            playBeep();
-            if(mode === 'lens') processLensCode(text); else processFrameCode(text);
-            stopScanner(mode);
-        }, () => {}).then(() => {
-            isScannerRunning = true;
-            btn.style.background = "var(--danger)";
-            btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`;
-        });
+            playBeep(); if(mode === 'lens') processLensCode(text); else processFrameCode(text); stopScanner(mode);
+        }, () => {}).then(() => { isScannerRunning = true; btn.style.background = "var(--danger)"; btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`; });
     } else { stopScanner(mode); }
 }
 
 function stopScanner(mode) {
     if (html5QrCode) {
         html5QrCode.stop().then(() => {
-            document.getElementById('reader-lens').style.display = 'none';
-            document.getElementById('reader-frame').style.display = 'none';
-            isScannerRunning = false;
-            document.getElementById('scan-btn-lens').style.background = "#333";
-            document.getElementById('scan-btn-frame').style.background = "#333";
+            document.getElementById('reader-lens').style.display = 'none'; document.getElementById('reader-frame').style.display = 'none';
+            isScannerRunning = false; document.getElementById('scan-btn-lens').style.background = "var(--text-main)"; document.getElementById('scan-btn-frame').style.background = "var(--text-main)";
             updateTranslations();
         });
     }
@@ -451,232 +539,144 @@ function stopScanner(mode) {
 function processLensCode(code) {
     let clean = code.trim().replace(/\s+/g, "");
     if (/^[A-Z]{3}[PM]/.test(clean)) {
-        scannedLensSku = null;
-        let type = clean.substring(0, 3);
-        let signChar = clean.substring(3, 4); 
-        let rest = clean.substring(4);
+        scannedLensSku = null; let type = clean.substring(0, 3); let signChar = clean.substring(3, 4); let rest = clean.substring(4);
         let sel = document.getElementById('type');
-        for(let i=0; i<sel.options.length; i++){
-            if(sel.options[i].value === type && sel.options[i].getAttribute('data-sign') === signChar){
-                sel.selectedIndex = i;
-                break;
-            }
-        }
-        let sphStr, cylStr;
-        let firstIsLetter = /^[PM]/.test(rest);
-        if (firstIsLetter) { sphStr = rest.substring(0, 4); rest = rest.substring(4); } 
-        else { sphStr = rest.substring(0, 3); rest = rest.substring(3); }
+        for(let i=0; i<sel.options.length; i++){ if(sel.options[i].value === type && sel.options[i].getAttribute('data-sign') === signChar){ sel.selectedIndex = i; break; } }
+        let sphStr, cylStr; let firstIsLetter = /^[PM]/.test(rest);
+        if (firstIsLetter) { sphStr = rest.substring(0, 4); rest = rest.substring(4); } else { sphStr = rest.substring(0, 3); rest = rest.substring(3); }
         cylStr = rest;
-        const conv = (s) => {
-            if (s === "000") return "0.00";
-            return (s[0] === 'P' ? '' : '-') + (parseInt(s.substring(1)) / 100).toFixed(2);
-        };
-        document.getElementById('sph').value = conv(sphStr); 
-        document.getElementById('cyl').value = conv(cylStr);
-        generateLive('lens');
-    } else {
-        scannedLensSku = clean; 
-        document.getElementById("sku-text-lens").innerText = clean;
-        JsBarcode("#barcode-svg-lens", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
-    }
+        const conv = (s) => { if (s === "000") return "0.00"; return (s[0] === 'P' ? '' : '-') + (parseInt(s.substring(1)) / 100).toFixed(2); };
+        document.getElementById('sph').value = conv(sphStr); document.getElementById('cyl').value = conv(cylStr); generateLive('lens');
+    } else { scannedLensSku = clean; document.getElementById("sku-text-lens").innerText = clean; JsBarcode("#barcode-svg-lens", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); }
 }
 
-function processFrameCode(code) {
-    let clean = code.trim();
-    scannedFrameSku = clean;
-    document.getElementById("sku-text-frame").innerText = clean;
-    JsBarcode("#barcode-svg-frame", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
-}
-
-function clearManualAndGen(mode) {
-    if(mode === 'lens') { scannedLensSku = null; generateLive('lens'); }
-    else { scannedFrameSku = null; generateLive('frame'); }
-}
+function processFrameCode(code) { let clean = code.trim(); scannedFrameSku = clean; document.getElementById("sku-text-frame").innerText = clean; JsBarcode("#barcode-svg-frame", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); }
+function clearManualAndGen(mode) { if(mode === 'lens') { scannedLensSku = null; generateLive('lens'); } else { scannedFrameSku = null; generateLive('frame'); } }
 
 function generateLive(mode) {
     if (mode === 'lens') {
         if (scannedLensSku) return scannedLensSku;
-        const t = document.getElementById("type").value;
-        const typeOption = document.getElementById("type").selectedOptions[0];
-        const typeSign = typeOption.getAttribute('data-sign');
-        const f = (v) => { 
-            let val = parseFloat(v);
-            if (val === 0) return "000";
-            return (val > 0 ? "P" : "M") + Math.abs(val).toFixed(2).replace(".", ""); 
-        };
+        const t = document.getElementById("type").value; const typeOption = document.getElementById("type").selectedOptions[0]; const typeSign = typeOption.getAttribute('data-sign');
+        const f = (v) => { let val = parseFloat(v); if (val === 0) return "000"; return (val > 0 ? "P" : "M") + Math.abs(val).toFixed(2).replace(".", ""); };
         const sku = `${t}${typeSign}${f(document.getElementById("sph").value)}${f(document.getElementById("cyl").value)}`;
-        document.getElementById("sku-text-lens").innerText = sku;
-        JsBarcode("#barcode-svg-lens", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
-        return sku;
+        document.getElementById("sku-text-lens").innerText = sku; JsBarcode("#barcode-svg-lens", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); return sku;
     } else {
         if (scannedFrameSku) return scannedFrameSku;
-        const type = document.getElementById('glass-type-select').value;
-        const b = document.getElementById('glass-brand-select').value;
-        const c = document.getElementById('glass-color-select').value;
-        const factoryCode = document.getElementById('glass-factory-code').value.trim().toUpperCase().replace(/\s+/g, "");
-        let sku = `${type}${b}${c}`;
-        if(factoryCode) { sku += `${factoryCode}`; }
-        document.getElementById("sku-text-frame").innerText = sku;
-        JsBarcode("#barcode-svg-frame", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false });
-        return sku;
+        const type = document.getElementById('glass-type-select').value; const b = document.getElementById('glass-brand-select').value; const c = document.getElementById('glass-color-select').value; const factoryCode = document.getElementById('glass-factory-code').value.trim().toUpperCase().replace(/\s+/g, "");
+        let sku = `${type}${b}${c}`; if(factoryCode) { sku += `${factoryCode}`; }
+        document.getElementById("sku-text-frame").innerText = sku; JsBarcode("#barcode-svg-frame", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); return sku;
     }
 }
 
 function addToInventory(mode) {
     let sku, qty, isFrame;
-    if(mode === 'lens') {
-        sku = scannedLensSku || generateLive('lens');
-        qty = parseInt(document.getElementById("qty-lens").value) || 1;
-        isFrame = false;
-        scannedLensSku = null; document.getElementById("qty-lens").value = 1; generateLive('lens');
-    } else {
-        sku = scannedFrameSku || generateLive('frame');
-        qty = parseInt(document.getElementById("glass-qty").value) || 1;
-        isFrame = true;
-        scannedFrameSku = null; 
-        document.getElementById("glass-qty").value = 1; 
-        document.getElementById("glass-factory-code").value = "";
-        generateLive('frame');
+    if(mode === 'lens') { 
+        sku = scannedLensSku || generateLive('lens'); 
+        qty = parseInt(document.getElementById("qty-lens").value) || 0; 
+        isFrame = false; 
+    } else { 
+        sku = scannedFrameSku || generateLive('frame'); 
+        qty = parseInt(document.getElementById("glass-qty").value) || 0; 
+        isFrame = true; 
     }
-    updateLocalInventory(sku, qty, isFrame);
-    alert(i18n[currentLang].saved_msg);
+
+    if (qty <= 0) {
+        showToast(i18n[currentLang].err_qty, 'error');
+        return;
+    }
+
+    if(mode === 'lens') {
+        scannedLensSku = null; document.getElementById("qty-lens").value = 1; generateLive('lens'); 
+    } else {
+        scannedFrameSku = null; document.getElementById("glass-qty").value = 1; document.getElementById("glass-factory-code").value = ""; generateLive('frame'); 
+    }
+    
+    updateLocalInventory(sku, qty, isFrame); 
+    showToast(i18n[currentLang].saved_msg, 'success');
 }
 
 function updateLocalInventory(sku, qtyChange, isFrame) {
-    let now = new Date().toLocaleString('en-GB');
-    let idx = inventory.findIndex(i => i.sku === sku);
-    if(idx > -1) { 
-        inventory[idx].qty += qtyChange; 
-        if(inventory[idx].qty <= 0) inventory.splice(idx, 1); 
-    } else if (qtyChange > 0) { 
-        inventory.unshift({ sku, qty: qtyChange, date: now, isFrame: isFrame }); 
-    }
-    localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory));
-    renderList();
+    let now = new Date().toLocaleString('en-GB'); let idx = inventory.findIndex(i => i.sku === sku);
+    if(idx > -1) { inventory[idx].qty += qtyChange; if(inventory[idx].qty <= 0) inventory.splice(idx, 1); } else if (qtyChange > 0) { inventory.unshift({ sku, qty: qtyChange, date: now, isFrame: isFrame }); }
+    localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList();
 }
 
 function editQtyManually(sku, currentQty, isFrame) {
-    let newQty = prompt(i18n[currentLang].enter_new_qty, currentQty);
-    if (newQty !== null) {
-        let parsed = parseInt(newQty);
-        if (!isNaN(parsed) && parsed > 0) {
-            let idx = inventory.findIndex(i => i.sku === sku);
-            if (idx > -1) {
-                inventory[idx].qty = parsed;
-                localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory));
-                renderList();
-            }
-        } else if (parsed === 0) {
-            if(confirm("Delete item?")) {
-                let idx = inventory.findIndex(i => i.sku === sku);
-                if (idx > -1) {
-                    inventory.splice(idx, 1);
-                    localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory));
-                    renderList();
-                }
-            }
-        }
-    }
+    let newQty = prompt(i18n[currentLang].enter_new_qty || "Enter new Qty", currentQty);
+    if (newQty !== null) { let parsed = parseInt(newQty); if (!isNaN(parsed) && parsed > 0) { let idx = inventory.findIndex(i => i.sku === sku); if (idx > -1) { inventory[idx].qty = parsed; localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList(); } } else if (parsed === 0) { if(confirm("Delete item?")) { let idx = inventory.findIndex(i => i.sku === sku); if (idx > -1) { inventory.splice(idx, 1); localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList(); } } } }
 }
 
 function renderList() {
-    const l = document.getElementById("inventory-list");
-    l.innerHTML = "";
-    if(inventory.length === 0) { l.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${i18n[currentLang].empty}</p>`; return; }
-    const lenses = inventory.filter(i => !i.isFrame);
-    const frames = inventory.filter(i => i.isFrame);
-    if (lenses.length > 0) {
-        l.innerHTML += `<div class="section-divider">${i18n[currentLang].lenses}</div>`;
-        lenses.forEach(item => l.innerHTML += getItemHTML(item));
-    }
-    if (frames.length > 0) {
-        l.innerHTML += `<div class="section-divider">${i18n[currentLang].frames}</div>`;
-        frames.forEach(item => l.innerHTML += getItemHTML(item));
-    }
+    const l = document.getElementById("inventory-list"); l.innerHTML = "";
+    if(inventory.length === 0) { l.innerHTML = `<p style="text-align:center; color:var(--text-sec); padding:20px;">${i18n[currentLang].empty}</p>`; return; }
+    const lenses = inventory.filter(i => !i.isFrame); const frames = inventory.filter(i => i.isFrame);
+    if (lenses.length > 0) { l.innerHTML += `<div class="section-divider">Lenses</div>`; lenses.forEach(item => l.innerHTML += getItemHTML(item)); }
+    if (frames.length > 0) { l.innerHTML += `<div class="section-divider">Frames</div>`; frames.forEach(item => l.innerHTML += getItemHTML(item)); }
 }
 
 function getItemHTML(item) {
-    return `<div class="inventory-item">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div><b>${item.sku}</b><div style="font-size:10px; color:#999;">⏰ ${item.date}</div></div>
-            <div class="qty-controls">
-                <button class="edit-btn" style="background:var(--danger); color:white;" onclick="updateLocalInventory('${item.sku}', -1, ${item.isFrame})">-</button>
-                <div class="qty-circle" onclick="editQtyManually('${item.sku}', ${item.qty}, ${item.isFrame})">${item.qty}</div>
-                <button class="edit-btn" style="background:var(--success); color:white;" onclick="updateLocalInventory('${item.sku}', 1, ${item.isFrame})">+</button>
-            </div>
-        </div>
-        <button style="width:100%; margin-top:10px; background:var(--success); color:white; border-radius:8px; padding:8px; border:none;" onclick="sendAndRemove('${item.sku}', ${item.qty}, ${item.isFrame}, this)">📤 ${i18n[currentLang].send_to_sheet}</button>
-    </div>`;
+    return `<div class="inventory-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div><b>${item.sku}</b><div style="font-size:10px; color:var(--text-sec);">⏰ ${item.date}</div></div><div class="qty-controls"><button class="edit-btn" style="background:var(--danger); color:white;" onclick="updateLocalInventory('${item.sku}', -1, ${item.isFrame})">-</button><div class="qty-circle" onclick="editQtyManually('${item.sku}', ${item.qty}, ${item.isFrame})">${item.qty}</div><button class="edit-btn" style="background:var(--success); color:white;" onclick="updateLocalInventory('${item.sku}', 1, ${item.isFrame})">+</button></div></div><button style="width:100%; margin-top:10px; background:var(--success); color:white; border-radius:8px; padding:8px; border:none;" onclick="sendAndRemove('${item.sku}', ${item.qty}, ${item.isFrame}, this)">📤 ${i18n[currentLang].send_to_sheet}</button></div>`;
 }
 
 async function sendAndRemove(sku, qty, isFrame, btnElement) {
     btnElement.disabled = true; btnElement.style.opacity = "0.5"; btnElement.innerText = i18n[currentLang].sending;
     let now = new Date().toLocaleString('en-GB');
-    try {
-        await fetch(sheetURL, { 
-            method: "POST", mode: "no-cors", 
-            body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now, type: isFrame ? 'frame' : 'lens' }) 
-        });
-        inventory = inventory.filter(item => item.sku !== sku);
-        localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory));
-        renderList();
-    } catch (e) { alert("Error!"); btnElement.disabled = false; btnElement.style.opacity = "1"; }
-}
-
-function updateTranslations() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
-    });
-}
-
-function toggleLang() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-    document.getElementById('lang-toggle').innerText = currentLang === 'ar' ? 'English' : 'العربية';
-    updateTranslations();
-    renderList();
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function fillOptions() {
-    const s = document.getElementById('sph'), c = document.getElementById('cyl');
-    for (let i = 6; i >= -6; i -= 0.25) {
-        let l = (i > 0 ? "+" : "") + i.toFixed(2);
-        s.add(new Option(l, i.toFixed(2))); c.add(new Option(l, i.toFixed(2)));
+    try { 
+        await fetch(sheetURL, { method: "POST", mode: "no-cors", body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now, type: isFrame ? 'frame' : 'lens' }) }); 
+        inventory = inventory.filter(item => item.sku !== sku); 
+        localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); 
+        renderList(); 
+        showToast(i18n[currentLang].saved_sent, 'success');
+    } catch (e) { 
+        showToast(i18n[currentLang].err_send, 'error'); 
+        btnElement.disabled = false; btnElement.style.opacity = "1"; 
     }
-    s.value = "0.00"; c.value = "0.00";
 }
 
-function updateAdminMenus() {
-    document.getElementById('glass-brand-select').innerHTML = config.brands.map(b => `<option value="${b}">${b}</option>`).join('');
-    document.getElementById('glass-color-select').innerHTML = config.colors.map(c => `<option value="${c}">${c}</option>`).join('');
-    ['brands', 'colors'].forEach(cat => {
-        document.getElementById(`list-${cat}`).innerHTML = config[cat].map((v, i) => `
-            <div class="admin-item">${v} <span class="del-x" onclick="removeItem('${cat}',${i})">❌</span></div>
-        `).join('');
-    });
+function updateTranslations() { document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); calculateEvents(); updateSettingsButtons(); }
+function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateTranslations(); renderList(); document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('update-date-text').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }); calculateEvents(); }
+
+function updateSettingsButtons() {
+    if(document.getElementById('setting-theme-btn')) document.getElementById('setting-theme-btn').innerText = isDarkMode ? i18n[currentLang].t_dark : i18n[currentLang].t_light;
+    if(document.getElementById('setting-lang-btn')) document.getElementById('setting-lang-btn').innerText = currentLang === 'ar' ? 'English' : 'العربية';
+    // populate config inputs
+    document.getElementById('cfg-lens-max').value = config.lensMax || 6.00;
+    document.getElementById('cfg-lens-min').value = config.lensMin || -6.00;
 }
 
-function addItem(cat, id) {
-    let v = document.getElementById(id).value.trim().toUpperCase();
-    if(v && !config[cat].includes(v)) { config[cat].push(v); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); document.getElementById(id).value=""; }
+function updateLensConfig() {
+    let max = parseFloat(document.getElementById('cfg-lens-max').value);
+    let min = parseFloat(document.getElementById('cfg-lens-min').value);
+    if(isNaN(max) || isNaN(min)) return;
+    config.lensMax = max;
+    config.lensMin = min;
+    localStorage.setItem("noor_config", JSON.stringify(config));
+    fillOptions(); // refresh dropdowns
+    showToast(i18n[currentLang].range_updated, 'success');
 }
 
+function fillOptions() { 
+    const s = document.getElementById('sph'), c = document.getElementById('cyl'); 
+    s.innerHTML = ""; c.innerHTML = "";
+    // Ensure defaults if missing
+    let max = config.lensMax !== undefined ? config.lensMax : 6.00;
+    let min = config.lensMin !== undefined ? config.lensMin : -6.00;
+    
+    for (let i = max; i >= min; i -= 0.25) { 
+        let l = (i > 0 ? "+" : "") + i.toFixed(2); 
+        s.add(new Option(l, i.toFixed(2))); 
+        c.add(new Option(l, i.toFixed(2))); 
+    } 
+    s.value = "0.00"; c.value = "0.00"; 
+}
+
+function updateAdminMenus() { document.getElementById('glass-brand-select').innerHTML = config.brands.map(b => `<option value="${b}">${b}</option>`).join(''); document.getElementById('glass-color-select').innerHTML = config.colors.map(c => `<option value="${c}">${c}</option>`).join(''); ['brands', 'colors'].forEach(cat => { document.getElementById(`list-${cat}`).innerHTML = config[cat].map((v, i) => `<div class="admin-item">${v} <span class="del-x" onclick="removeItem('${cat}',${i})">❌</span></div>`).join(''); }); }
+function addItem(cat, id) { let v = document.getElementById(id).value.trim().toUpperCase(); if(v && !config[cat].includes(v)) { config[cat].push(v); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); document.getElementById(id).value=""; } }
 function removeItem(cat, i) { config[cat].splice(i, 1); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); }
+function exportExcel() { let ws = XLSX.utils.json_to_sheet(inventory); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Records"); XLSX.writeFile(wb, "NoorGlass_Inventory.xlsx"); }
+function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); if(btn) btn.classList.add('active'); }
 
-function exportExcel() {
-    let ws = XLSX.utils.json_to_sheet(inventory); let wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Records"); XLSX.writeFile(wb, "NoorGlass_Inventory.xlsx");
-}
-
-function showPage(id, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active'); if(btn) btn.classList.add('active');
-}
-
-fillOptions(); updateAdminMenus(); generateLive('lens'); generateLive('frame'); renderList(); updateTranslations();
+fillOptions(); updateAdminMenus(); generateLive('lens'); generateLive('frame'); renderList(); updateTranslations(); calculateEvents();
 </script>
 </body>
 </html>
