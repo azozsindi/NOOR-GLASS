@@ -49,7 +49,7 @@
             --input-bg: #2c2c2c; --shadow: rgba(0,0,0,0.5);
             --success: #81c784; --danger: #e57373; --warning: #ffb74d;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: background-color 0.3s; -webkit-tap-highlight-color: transparent; }
         
         .app-header { background: var(--bg-card); color: var(--text-main); padding: var(--safe-top) 15px 15px 15px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px var(--shadow); }
         .header-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; letter-spacing: 1px; color: var(--primary); font-size: 1.2rem; }
@@ -71,14 +71,14 @@
         button { background: var(--primary); color: #fff; border: none; font-weight: bold; border-radius: 10px; padding: 14px; width: 100%; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; }
         [data-theme="dark"] button { color: #000; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main); }
-        .reader-div { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main); font-family: inherit; }
+        .reader-div { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); background: #000; }
         .barcode-box { text-align: center; background: #fff; padding: 15px; border-radius: 10px; border: 1px dashed #ccc; margin: 15px 0; }
         .sku-label { font-family: monospace; font-weight: bold; color: var(--danger); font-size: 1.2rem; word-break: break-all; margin-bottom: 5px; }
 
         .inventory-item { padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid var(--primary); background: var(--bg-card); box-shadow: 0 2px 8px var(--shadow); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
         .qty-controls { display: flex; align-items: center; gap: 10px; }
-        .edit-btn { width: 32px !important; height: 32px; padding: 0 !important; border-radius: 8px !important; font-size: 18px; }
+        .edit-btn { width: 32px !important; height: 32px; padding: 0 !important; border-radius: 8px !important; font-size: 18px; display:flex; align-items:center; justify-content:center; }
         .qty-circle { border: 2px solid var(--primary); min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; cursor: pointer; background: rgba(13,71,161,0.1); color: var(--primary); }
         
         .time-widget { background: var(--input-bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
@@ -110,16 +110,16 @@
         #toast-box.success { background-color: var(--success); }
         #toast-box.error { background-color: var(--danger); }
 
-        /* Mobile-First Print Style */
+        /* Mobile-First Print Style - FIXED */
         #print-area { display: none; }
         @media print {
-            body * { visibility: hidden; height: 0; overflow: hidden; }
-            #print-area, #print-area * { visibility: visible; height: auto; overflow: visible; }
-            #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; z-index: 9999; background: white; color: black; direction: rtl; padding: 20px; }
-            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-            .print-table th, .print-table td { border: 1px solid #333; padding: 5px; text-align: center; }
-            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
-            @page { margin: 0.5cm; }
+            body > * { display: none !important; } /* Hide everything */
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; box-sizing: border-box; background: white; color: black; direction: rtl; }
+            #print-area * { visibility: visible; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: center; }
+            .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .print-meta { font-size: 10px; color: #555; }
         }
     </style>
 </head>
@@ -156,7 +156,8 @@
         <h2 data-i18n="u_title">🆕 آخر التحديثات</h2>
         <div style="background:rgba(255,193,7,0.1); padding:10px; border-radius:10px; font-size:0.85rem; line-height:1.6; max-height:300px; overflow-y:auto;">
             <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 <span data-i18n="update_date_lbl">تاريخ التحديث:</span> <span id="update-date-text"></span></p>
-            <div id="updates-content"></div>
+            <div id="updates-content">
+                </div>
         </div>
         <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 <span data-i18n="open_guide">فتح الدليل التفصيلي</span></div>
     </div>
@@ -174,7 +175,10 @@
 <div id="page-extras" class="page">
     <div class="card">
         <h2 style="color:var(--primary);" data-i18n="notes_title">📝 دفتر الملاحظات</h2>
-        <textarea id="user-notes" style="width:100%; height:300px; padding:15px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main); font-size:1rem; line-height:1.5;" oninput="saveNotesDebounced()"></textarea>
+        <div style="background:var(--input-bg); border:1px solid var(--border); border-radius:10px; padding:10px;">
+            <textarea id="user-notes" style="width:100%; height:300px; border:none; background:transparent; color:var(--text-main); font-size:1.1rem; line-height:1.6; outline:none; resize:none;" oninput="saveNotesDebounced()"></textarea>
+            <div style="text-align:left; font-size:0.8rem; color:var(--text-sec); margin-top:5px;">✅ <span data-i18n="notes_desc">حفظ تلقائي</span></div>
+        </div>
     </div>
 </div>
 
@@ -373,11 +377,10 @@ let config = JSON.parse(localStorage.getItem("noor_config")) || {
 
 let html5QrCode = null; let audioCtx = null; let isScannerRunning = false; let scannedLensSku = null; let scannedFrameSku = null;
 let isDarkMode = localStorage.getItem('noor_theme') === 'dark';
-let noteSaveTimeout; // For Debouncing
+let noteSaveTimeout; 
 
 if(isDarkMode) document.body.setAttribute('data-theme', 'dark');
 
-// Time Logic
 const now = new Date();
 const nowStr = now.toLocaleString('ar-SA', {weekday:'short', hour:'2-digit', minute:'2-digit'});
 document.getElementById('login-time-span').innerText = nowStr;
@@ -401,7 +404,7 @@ const i18n = {
         contact_us: "📞 تواصل معنا", m_brands: "1. قائمة الماركات المعتمدة:", m_colors: "2. قائمة الألوان المعتمدة:",
         frame_type_lbl: "تصنيف الفريم:", type_med: "👓 طبي", type_sun: "🕶️ شمسي",
         factory_code_lbl: "كود المصنع (اختياري):", current_login: "وقت الدخول:", last_visit: "آخر زيارة:",
-        events_title: "📅 مناسبات (2026)", notes_title: "📝 دفتر الملاحظات", notes_desc: "حفظ تلقائي:",
+        events_title: "📅 مناسبات (2026)", notes_title: "📝 دفتر الملاحظات", notes_desc: "حفظ تلقائي",
         guide_title: "⭐ دليل المستخدم التفصيلي", h_anatomy: "1. هيكل كود العدسة", h_anatomy_frame: "2. هيكل كود الفريم (Smart SKU)", h_table: "3. جدول المصطلحات الشامل", h_reading: "4. قراءة الأرقام",
         gd_1_t: "1. البداية والإعداد:", gd_1_d: "عند فتح التطبيق لأول مرة، اذهب إلى صفحة 'الإعدادات' لضبط اللغة، المظهر، وإدخال بيانات الفريمات ونطاق العدسات.",
         gd_2_t: "2. جرد العدسات:", gd_2_d: "اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات. سيظهر باركود تلقائي. اضغط 'حفظ' للتخزين.",
@@ -436,7 +439,7 @@ const i18n = {
         contact_us: "📞 Contact Us", m_brands: "1. Approved Brands List:", m_colors: "2. Approved Colors List:",
         frame_type_lbl: "Frame Type:", type_med: "👓 Medical", type_sun: "🕶️ Sunglasses",
         factory_code_lbl: "Factory Code:", current_login: "Login:", last_visit: "Last:",
-        events_title: "📅 Events (2026)", notes_title: "📝 Notepad", notes_desc: "Auto-saved:",
+        events_title: "📅 Events (2026)", notes_title: "📝 Notepad", notes_desc: "Auto-saved",
         guide_title: "⭐ Detailed User Guide", h_anatomy: "1. Lens Code", h_anatomy_frame: "2. Frame Code (Smart SKU)", h_table: "3. Complete Terminology", h_reading: "4. Reading Numbers",
         gd_1_t: "1. Setup:", gd_1_d: "Go to Settings to set Language, Theme, Frame Data, and Lens Power Ranges.",
         gd_2_t: "2. Lens Inventory:", gd_2_d: "Select Lens Type, Power (SPH/CYL). Scan or auto-generate code. Click Save.",
@@ -480,7 +483,6 @@ function toggleTheme() {
     updateSettingsButtons();
 }
 
-// Optimization: Debounce save to prevent lag while typing
 function saveNotesDebounced() {
     clearTimeout(noteSaveTimeout);
     noteSaveTimeout = setTimeout(() => {
@@ -495,27 +497,47 @@ function printStyledInvoice() {
         let typeLabel = item.isFrame ? "Frame" : "Lens";
         tbody.innerHTML += `<tr><td style="font-family:monospace; font-weight:bold;">${item.sku}</td><td>${item.qty}</td><td>${typeLabel}</td></tr>`;
     });
-    window.print();
+    // Timeout to ensure DOM update before print dialog
+    setTimeout(() => window.print(), 100);
 }
 
 function toggleScanner(mode) {
     const btn = document.getElementById(mode === 'lens' ? 'scan-btn-lens' : 'scan-btn-frame');
     const readerDiv = document.getElementById(mode === 'lens' ? 'reader-lens' : 'reader-frame');
     if (!isScannerRunning) {
-        readerDiv.style.display = 'block'; html5QrCode = new Html5Qrcode(readerDiv.id);
+        readerDiv.style.display = 'block'; 
+        html5QrCode = new Html5Qrcode(readerDiv.id);
         html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
             playBeep(); if(mode === 'lens') processLensCode(text); else processFrameCode(text); stopScanner(mode);
-        }, () => {}).then(() => { isScannerRunning = true; btn.style.background = "var(--danger)"; btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`; });
-    } else { stopScanner(mode); }
+        }, () => {}).then(() => { 
+            isScannerRunning = true; 
+            btn.style.background = "var(--danger)"; 
+            btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`; 
+        }).catch(err => {
+            console.log("Scanner start failed", err);
+            isScannerRunning = false;
+        });
+    } else { 
+        stopScanner(mode); 
+    }
 }
 
 function stopScanner(mode) {
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            document.getElementById('reader-lens').style.display = 'none'; document.getElementById('reader-frame').style.display = 'none';
-            isScannerRunning = false; document.getElementById('scan-btn-lens').style.background = "var(--text-main)"; document.getElementById('scan-btn-frame').style.background = "var(--text-main)";
-            updateTranslations();
+    // Force reset UI immediately to prevent hanging button state
+    const resetUI = () => {
+        document.getElementById('reader-lens').style.display = 'none'; 
+        document.getElementById('reader-frame').style.display = 'none';
+        isScannerRunning = false; 
+        updateTranslations(); // Resets button text
+    };
+
+    if (html5QrCode && isScannerRunning) {
+        html5QrCode.stop().then(resetUI).catch(err => {
+            console.log("Scanner stop error", err);
+            resetUI(); // Force reset even if error
         });
+    } else {
+        resetUI();
     }
 }
 
@@ -638,11 +660,8 @@ function exportExcel() {
 
 function updateTranslations() { 
     document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); 
-    
-    // Inject updates HTML safely
     const updatesContainer = document.getElementById('updates-content');
     if(updatesContainer) updatesContainer.innerHTML = i18n[currentLang].updates_html;
-
     updateSettingsButtons(); 
 }
 
@@ -651,7 +670,6 @@ function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; docume
 function updateSettingsButtons() {
     if(document.getElementById('setting-theme-btn')) document.getElementById('setting-theme-btn').innerText = isDarkMode ? i18n[currentLang].t_dark : i18n[currentLang].t_light;
     if(document.getElementById('setting-lang-btn')) document.getElementById('setting-lang-btn').innerText = currentLang === 'ar' ? 'English' : 'العربية';
-    // populate config inputs
     document.getElementById('cfg-lens-max').value = config.lensMax || 6.00;
     document.getElementById('cfg-lens-min').value = config.lensMin || -6.00;
 }
@@ -663,17 +681,15 @@ function updateLensConfig() {
     config.lensMax = max;
     config.lensMin = min;
     localStorage.setItem("noor_config", JSON.stringify(config));
-    fillOptions(); // refresh dropdowns
+    fillOptions(); 
     showToast(i18n[currentLang].range_updated, 'success');
 }
 
 function fillOptions() { 
     const s = document.getElementById('sph'), c = document.getElementById('cyl'); 
     s.innerHTML = ""; c.innerHTML = "";
-    // Ensure defaults if missing
     let max = config.lensMax !== undefined ? config.lensMax : 6.00;
     let min = config.lensMin !== undefined ? config.lensMin : -6.00;
-    
     for (let i = max; i >= min; i -= 0.25) { 
         let l = (i > 0 ? "+" : "") + i.toFixed(2); 
         s.add(new Option(l, i.toFixed(2))); 
