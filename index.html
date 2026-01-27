@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NOOR GLASS - Abdulaziz Sindi 2026</title>
+    <title>NOOR GLASS - Inventory System 2026</title>
     
     <link rel="manifest" href='data:application/json,{"short_name":"NoorGlass","name":"Noor Glass Inventory System","icons":[{"src":"logo.png","sizes":"192x192 512x512","type":"image/png","purpose":"any maskable"}],"start_url":"./index.html","display":"standalone","theme_color":"#0d47a1","background_color":"#ffffff"}'>
     
@@ -28,7 +28,8 @@
             --input-bg: #2c2c2c; --shadow: rgba(0,0,0,0.5);
             --success: #81c784; --danger: #e57373; --warning: #ffb74d;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: 0.3s; }
+        /* Optimized transition for better performance */
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         
         .app-header { background: var(--bg-card); color: var(--text-main); padding: var(--safe-top) 15px 15px 15px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px var(--shadow); }
         .header-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; letter-spacing: 1px; color: var(--primary); font-size: 1.2rem; }
@@ -39,9 +40,9 @@
         .nav-item.active { color: var(--primary); font-weight: bold; background: rgba(13, 71, 161, 0.05); border-top: 3px solid var(--primary); }
         [data-theme="dark"] .nav-item.active { background: rgba(255,255,255,0.05); }
         
-        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .card { background: var(--bg-card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
         h2 { font-size: 1rem; color: var(--primary); margin: 0 0 15px 0; border-right: 4px solid var(--primary); padding-right: 12px; display: flex; align-items: center; }
@@ -139,35 +140,11 @@
     <div class="card">
         <h2 data-i18n="u_title">🆕 آخر التحديثات</h2>
         <div style="background:rgba(255,193,7,0.1); padding:10px; border-radius:10px; font-size:0.85rem; line-height:1.6; max-height:300px; overflow-y:auto;">
-            <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 تاريخ التحديث: <span id="update-date-text"></span></p>
-            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
-                <li style="margin-bottom:12px;">
-                    <strong>1. نظام جرد الفريمات (Frames Inventory):</strong><br>
-                    تصنيف ذكي (طبي/شمسي) وإمكانية اختيار (الماركة، اللون، وكود المصنع) لإنشاء باركود فريد لكل إطار.
-                </li>
-                <li style="margin-bottom:12px;">
-                    <strong>2. الإدارة الذكية لمقاسات العدسات:</strong><br>
-                    إضافة لوحة تحكم لتحديد نطاق المقاسات (أعلى وأقل مقاس) مع الالتزام بخطوة 0.25 تلقائياً.
-                </li>
-                <li style="margin-bottom:12px;">
-                    <strong>3. تحسينات واجهة المستخدم (UI/UX):</strong><br>
-                    دعم الوضع الليلي (Dark Mode)، تصميم جديد للقائمة السفلية، وتنبيهات فورية (Toasts) ملونة.
-                </li>
-                <li style="margin-bottom:12px;">
-                    <strong>4. الرقابة والتدقيق (Tracking):</strong><br>
-                    سجل دقيق لوقت الدخول وآخر زيارة، مع تسجيل توقيت حفظ كل صنف بالثانية.
-                </li>
-                <li style="margin-bottom:12px;">
-                    <strong>5. تطوير نظام الـ SKU والباركود:</strong><br>
-                    تنسيق احترافي للكود (النوع-المقاس-الإشارة) ودعم طباعة SVG واضحة جداً.
-                </li>
-                <li style="margin-bottom:5px;">
-                    <strong>6. الربط السحابي والنسخ الاحتياطي:</strong><br>
-                    تحسين سرعة الإرسال لـ Google Sheets وتصدير ملفات Excel بتنسيق جاهز للمحاسبة.
-                </li>
-            </ul>
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 <span data-i18n="update_date_lbl">تاريخ التحديث:</span> <span id="update-date-text"></span></p>
+            <div id="updates-content">
+                </div>
         </div>
-        <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 فتح الدليل التفصيلي</div>
+        <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 <span data-i18n="open_guide">فتح الدليل التفصيلي</span></div>
     </div>
 
     <div class="card">
@@ -187,7 +164,7 @@
     </div>
     <div class="card">
         <h2 style="color:var(--primary);" data-i18n="notes_title">📝 دفتر الملاحظات</h2>
-        <textarea id="user-notes" style="width:100%; height:150px; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main);" oninput="saveNotes()"></textarea>
+        <textarea id="user-notes" style="width:100%; height:150px; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main);" oninput="saveNotesDebounced()"></textarea>
     </div>
 </div>
 
@@ -377,7 +354,6 @@
 <script>
 let currentLang = 'ar';
 let inventory = JSON.parse(localStorage.getItem("noor_glass_v2026_final")) || [];
-// Default config now includes lens ranges
 let config = JSON.parse(localStorage.getItem("noor_config")) || { 
     brands: ["RAY-BAN", "GUCCI", "PRADA", "TOM FORD"], 
     colors: ["BLACK", "GOLD", "SILVER", "BROWN"],
@@ -387,6 +363,7 @@ let config = JSON.parse(localStorage.getItem("noor_config")) || {
 
 let html5QrCode = null; let audioCtx = null; let isScannerRunning = false; let scannedLensSku = null; let scannedFrameSku = null;
 let isDarkMode = localStorage.getItem('noor_theme') === 'dark';
+let noteSaveTimeout; // For Debouncing
 
 if(isDarkMode) document.body.setAttribute('data-theme', 'dark');
 
@@ -429,7 +406,17 @@ const i18n = {
         admin_general: "⚙️ الإعدادات العامة", admin_inv: "👓 إدارة بيانات الفريمات", mode_label: "المظهر:", lang_label: "اللغة:", t_light: "☀️ نهاري", t_dark: "🌙 ليلي",
         admin_lens_config: "📏 إعدادات مقاسات العدسات", lens_hint: "تحكم في نطاق المقاسات التي تظهر في القوائم.",
         lbl_max_pos: "أعلى مقاس موجب (+):", lbl_max_neg: "أعلى مقاس سالب (-):", update_lens_range: "تحديث نطاق المقاسات",
-        range_updated: "تم تحديث نطاق العدسات!"
+        range_updated: "تم تحديث نطاق العدسات!", update_date_lbl: "تاريخ التحديث:",
+        updates_html: `
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">أهلاً بك، إليك أبرز التحديثات:</p>
+            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
+                <li style="margin-bottom:12px;"><strong>1. نظام جرد الفريمات (Frames Inventory):</strong><br>تصنيف ذكي (طبي/شمسي) وإمكانية اختيار (الماركة، اللون، وكود المصنع) لإنشاء باركود فريد.</li>
+                <li style="margin-bottom:12px;"><strong>2. الإدارة الذكية لمقاسات العدسات:</strong><br>إضافة لوحة تحكم لتحديد نطاق المقاسات (أعلى وأقل مقاس).</li>
+                <li style="margin-bottom:12px;"><strong>3. تحسينات واجهة المستخدم (UI/UX):</strong><br>دعم الوضع الليلي (Dark Mode) وتنبيهات فورية ملونة.</li>
+                <li style="margin-bottom:12px;"><strong>4. الرقابة والتدقيق (Tracking):</strong><br>سجل دقيق لوقت الدخول وآخر زيارة.</li>
+                <li style="margin-bottom:12px;"><strong>5. تطوير نظام الـ SKU والباركود:</strong><br>تنسيق احترافي للكود ودعم طباعة SVG.</li>
+                <li style="margin-bottom:5px;"><strong>6. الربط السحابي والنسخ الاحتياطي:</strong><br>تحسين سرعة الإرسال لـ Google Sheets.</li>
+            </ul>`
     },
     en: {
         nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin", nav_extras: "Events",
@@ -457,7 +444,17 @@ const i18n = {
         admin_general: "⚙️ General Settings", admin_inv: "👓 Frame Data Management", mode_label: "Theme:", lang_label: "Language:", t_light: "☀️ Light", t_dark: "🌙 Dark",
         admin_lens_config: "📏 Lens Size Config", lens_hint: "Control the power range displayed in lists.",
         lbl_max_pos: "Max Plus Power (+):", lbl_max_neg: "Max Minus Power (-):", update_lens_range: "Update Range",
-        range_updated: "Lens Range Updated!"
+        range_updated: "Lens Range Updated!", update_date_lbl: "Update Date:",
+        updates_html: `
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">Welcome. Here are the updates:</p>
+            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
+                <li style="margin-bottom:12px;"><strong>1. Frames Inventory:</strong><br>Smart classification (Medical/Sun) with custom Brand, Color, and Factory Code for unique barcodes.</li>
+                <li style="margin-bottom:12px;"><strong>2. Lens Power Management:</strong><br>Admin panel to set Max/Min lens power ranges dynamically.</li>
+                <li style="margin-bottom:12px;"><strong>3. UI/UX Improvements:</strong><br>Dark Mode support, new bottom nav, and toast notifications.</li>
+                <li style="margin-bottom:12px;"><strong>4. Tracking:</strong><br>Precise login and last visit logging.</li>
+                <li style="margin-bottom:12px;"><strong>5. SKU & Barcode:</strong><br>Professional SKU format and clear SVG barcode printing.</li>
+                <li style="margin-bottom:5px;"><strong>6. Cloud & Backup:</strong><br>Improved Google Sheets syncing and Excel export.</li>
+            </ul>`
     }
 };
 
@@ -479,7 +476,13 @@ function toggleTheme() {
     updateSettingsButtons();
 }
 
-function saveNotes() { localStorage.setItem('noor_notes', document.getElementById('user-notes').value); }
+// Optimization: Debounce save to prevent lag while typing
+function saveNotesDebounced() {
+    clearTimeout(noteSaveTimeout);
+    noteSaveTimeout = setTimeout(() => {
+        localStorage.setItem('noor_notes', document.getElementById('user-notes').value);
+    }, 500); 
+}
 
 function calculateEvents() {
     const today = new Date();
@@ -633,7 +636,16 @@ async function sendAndRemove(sku, qty, isFrame, btnElement) {
     }
 }
 
-function updateTranslations() { document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); calculateEvents(); updateSettingsButtons(); }
+function updateTranslations() { 
+    document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); 
+    
+    // Inject updates HTML safely
+    const updatesContainer = document.getElementById('updates-content');
+    if(updatesContainer) updatesContainer.innerHTML = i18n[currentLang].updates_html;
+
+    calculateEvents(); updateSettingsButtons(); 
+}
+
 function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateTranslations(); renderList(); document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('update-date-text').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }); calculateEvents(); }
 
 function updateSettingsButtons() {
