@@ -5,7 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NOOR GLASS - Inventory System 2026</title>
     
-    <link rel="manifest" href='data:application/json,{"short_name":"NoorGlass","name":"Noor Glass Inventory System","icons":[{"src":"logo.png","sizes":"192x192 512x512","type":"image/png","purpose":"any maskable"}],"start_url":"./index.html","display":"standalone","theme_color":"#0d47a1","background_color":"#ffffff"}'>
+    <link rel="manifest" href='data:application/json,{
+      "short_name": "NoorGlass",
+      "name": "Noor Glass Inventory System",
+      "description": "نظام شامل لإدارة مخزون العدسات والفريمات",
+      "lang": "ar",
+      "dir": "rtl",
+      "id": "noor-glass-app-v1",
+      "start_url": "./index.html",
+      "display": "standalone",
+      "orientation": "portrait",
+      "theme_color": "#0d47a1",
+      "background_color": "#ffffff",
+      "categories": ["productivity", "business", "utilities"],
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "192x192 512x512",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    }'>
     
     <meta name="theme-color" content="#0d47a1">
     <link rel="apple-touch-icon" href="logo.png">
@@ -28,7 +49,6 @@
             --input-bg: #2c2c2c; --shadow: rgba(0,0,0,0.5);
             --success: #81c784; --danger: #e57373; --warning: #ffb74d;
         }
-        /* Optimized transition for better performance */
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         
         .app-header { background: var(--bg-card); color: var(--text-main); padding: var(--safe-top) 15px 15px 15px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px var(--shadow); }
@@ -65,12 +85,6 @@
         .time-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
         .time-row:last-child { border-bottom: none; }
         
-        .event-card { display: flex; align-items: center; background: var(--bg-card); border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 6px var(--shadow); border: 1px solid var(--border); border-right: 5px solid var(--success); }
-        .event-icon { font-size: 2rem; margin-left: 12px; width: 40px; text-align: center; }
-        .event-content { flex: 1; }
-        .event-countdown { background: var(--primary); color: #fff; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; min-width: 70px; text-align: center; }
-        [data-theme="dark"] .event-countdown { color: #000; }
-
         .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; color: var(--text-main); }
         .info-table th, .info-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
         .info-table th { background: var(--input-bg); color: var(--primary); }
@@ -96,15 +110,16 @@
         #toast-box.success { background-color: var(--success); }
         #toast-box.error { background-color: var(--danger); }
 
-        /* Print Style */
+        /* Mobile-First Print Style */
         #print-area { display: none; }
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; direction: rtl; }
-            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px; }
-            .print-table th, .print-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            body * { visibility: hidden; height: 0; overflow: hidden; }
+            #print-area, #print-area * { visibility: visible; height: auto; overflow: visible; }
+            #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; z-index: 9999; background: white; color: black; direction: rtl; padding: 20px; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+            .print-table th, .print-table td { border: 1px solid #333; padding: 5px; text-align: center; }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+            @page { margin: 0.5cm; }
         }
     </style>
 </head>
@@ -141,8 +156,7 @@
         <h2 data-i18n="u_title">🆕 آخر التحديثات</h2>
         <div style="background:rgba(255,193,7,0.1); padding:10px; border-radius:10px; font-size:0.85rem; line-height:1.6; max-height:300px; overflow-y:auto;">
             <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 <span data-i18n="update_date_lbl">تاريخ التحديث:</span> <span id="update-date-text"></span></p>
-            <div id="updates-content">
-                </div>
+            <div id="updates-content"></div>
         </div>
         <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 <span data-i18n="open_guide">فتح الدليل التفصيلي</span></div>
     </div>
@@ -159,12 +173,8 @@
 
 <div id="page-extras" class="page">
     <div class="card">
-        <h2 style="color:var(--success);" data-i18n="events_title">📅 مناسبات هامة (2026)</h2>
-        <div id="events-container"></div>
-    </div>
-    <div class="card">
         <h2 style="color:var(--primary);" data-i18n="notes_title">📝 دفتر الملاحظات</h2>
-        <textarea id="user-notes" style="width:100%; height:150px; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main);" oninput="saveNotesDebounced()"></textarea>
+        <textarea id="user-notes" style="width:100%; height:300px; padding:15px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main); font-size:1rem; line-height:1.5;" oninput="saveNotesDebounced()"></textarea>
     </div>
 </div>
 
@@ -346,7 +356,7 @@
     <button class="nav-item" onclick="showPage('page-generate', this)">🔍 <br><span data-i18n="nav_add">عدسات</span></button>
     <button class="nav-item" onclick="showPage('page-glasses', this)">👓 <br><span data-i18n="nav_glasses">فريمات</span></button>
     <button class="nav-item" onclick="showPage('page-list', this)">📋 <br><span data-i18n="nav_list">السجلات</span></button>
-    <button class="nav-item" onclick="showPage('page-extras', this)">📅 <br><span data-i18n="nav_extras">مناسبات</span></button>
+    <button class="nav-item" onclick="showPage('page-extras', this)">📝 <br><span data-i18n="nav_extras">ملاحظات</span></button>
     <button id="nav-info-btn" class="nav-item" onclick="showPage('page-info', this)">ℹ️ <br><span data-i18n="nav_info">دليل</span></button>
     <button class="nav-item" onclick="showPage('page-admin', this)">⚙️ <br><span data-i18n="nav_admin">إعدادات</span></button>
 </nav>
@@ -381,7 +391,7 @@ document.getElementById('update-date-text').innerText = new Date().toLocaleDateS
 
 const i18n = {
     ar: {
-        nav_home: "الرئيسية", nav_add: "عدسات", nav_glasses: "فريمات", nav_list: "السجلات", nav_info: "دليل", nav_admin: "إعدادات", nav_extras: "مناسبات",
+        nav_home: "الرئيسية", nav_add: "عدسات", nav_glasses: "فريمات", nav_list: "السجلات", nav_info: "دليل", nav_admin: "إعدادات", nav_extras: "ملاحظات",
         welcome: "NOOR GLASS", u_title: "🆕 آخر التحديثات", open_guide: "📖 الدليل التفصيلي",
         u1: "إطلاق النظام الشامل.", u2: "الوضع الليلي.", u3: "طباعة PDF.", u4: "مناسبات بصرية.",
         add_item: "➕ جرد العدسات", glass_title: "👓 جرد الفريمات", admin_title: "⚙️ الإعدادات",
@@ -392,9 +402,6 @@ const i18n = {
         frame_type_lbl: "تصنيف الفريم:", type_med: "👓 طبي", type_sun: "🕶️ شمسي",
         factory_code_lbl: "كود المصنع (اختياري):", current_login: "وقت الدخول:", last_visit: "آخر زيارة:",
         events_title: "📅 مناسبات (2026)", notes_title: "📝 دفتر الملاحظات", notes_desc: "حفظ تلقائي:",
-        days_left: "يوم متبقي", 
-        ev_ramadan: "🌙 رمضان 1447", ev_eid_fitr: "🍬 عيد الفطر", ev_eid_adha: "🐑 عيد الأضحى", ev_national: "🇸🇦 اليوم الوطني",
-        ev_mother: "🎁 يوم الأم (21 مارس)", ev_sight: "👁️ يوم البصر (أكتوبر)", ev_diabetes: "🩸 يوم السكري (نوفمبر)",
         guide_title: "⭐ دليل المستخدم التفصيلي", h_anatomy: "1. هيكل كود العدسة", h_anatomy_frame: "2. هيكل كود الفريم (Smart SKU)", h_table: "3. جدول المصطلحات الشامل", h_reading: "4. قراءة الأرقام",
         gd_1_t: "1. البداية والإعداد:", gd_1_d: "عند فتح التطبيق لأول مرة، اذهب إلى صفحة 'الإعدادات' لضبط اللغة، المظهر، وإدخال بيانات الفريمات ونطاق العدسات.",
         gd_2_t: "2. جرد العدسات:", gd_2_d: "اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات. سيظهر باركود تلقائي. اضغط 'حفظ' للتخزين.",
@@ -419,7 +426,7 @@ const i18n = {
             </ul>`
     },
     en: {
-        nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin", nav_extras: "Events",
+        nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin", nav_extras: "Notes",
         welcome: "NOOR GLASS", u_title: "🆕 Updates", open_guide: "📖 Detailed Guide",
         u1: "System Launch.", u2: "Dark Mode.", u3: "PDF Print.", u4: "Optical Events.",
         add_item: "➕ Lens Inventory", glass_title: "👓 Frame Inventory", admin_title: "⚙️ Settings",
@@ -430,9 +437,6 @@ const i18n = {
         frame_type_lbl: "Frame Type:", type_med: "👓 Medical", type_sun: "🕶️ Sunglasses",
         factory_code_lbl: "Factory Code:", current_login: "Login:", last_visit: "Last:",
         events_title: "📅 Events (2026)", notes_title: "📝 Notepad", notes_desc: "Auto-saved:",
-        days_left: "Days Left", 
-        ev_ramadan: "🌙 Ramadan", ev_eid_fitr: "🍬 Eid Fitr", ev_eid_adha: "🐑 Eid Adha", ev_national: "🇸🇦 National Day",
-        ev_mother: "🎁 Mother's Day", ev_sight: "👁️ World Sight Day", ev_diabetes: "🩸 Diabetes Day",
         guide_title: "⭐ Detailed User Guide", h_anatomy: "1. Lens Code", h_anatomy_frame: "2. Frame Code (Smart SKU)", h_table: "3. Complete Terminology", h_reading: "4. Reading Numbers",
         gd_1_t: "1. Setup:", gd_1_d: "Go to Settings to set Language, Theme, Frame Data, and Lens Power Ranges.",
         gd_2_t: "2. Lens Inventory:", gd_2_d: "Select Lens Type, Power (SPH/CYL). Scan or auto-generate code. Click Save.",
@@ -482,30 +486,6 @@ function saveNotesDebounced() {
     noteSaveTimeout = setTimeout(() => {
         localStorage.setItem('noor_notes', document.getElementById('user-notes').value);
     }, 500); 
-}
-
-function calculateEvents() {
-    const today = new Date();
-    const events = [
-        { key: 'ev_ramadan', date: new Date('2026-02-17') }, { key: 'ev_mother', date: new Date('2026-03-21') },
-        { key: 'ev_eid_fitr', date: new Date('2026-03-19') }, { key: 'ev_eid_adha', date: new Date('2026-05-26') },
-        { key: 'ev_national', date: new Date('2026-09-23') }, { key: 'ev_sight', date: new Date('2026-10-08') },
-        { key: 'ev_diabetes', date: new Date('2026-11-14') }
-    ];
-    let html = '';
-    const lang = currentLang === 'ar' ? 'ar-EG' : 'en-US';
-    events.sort((a,b) => a.date - b.date);
-    events.forEach(e => {
-        const diffTime = e.date - today;
-        if (diffTime > -86400000) {
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const dateStr = e.date.toLocaleDateString(lang, { day: 'numeric', month: 'long' });
-            let badgeClass = 'event-countdown'; if(diffDays < 30) badgeClass += ' near';
-            html += `<div class="event-card"><div class="event-content"><h3 class="event-title" data-i18n="${e.key}"></h3><p class="event-date">${dateStr} 2026</p></div><div class="${badgeClass}">${diffDays} <span data-i18n="days_left"></span></div></div>`;
-        }
-    });
-    document.getElementById('events-container').innerHTML = html;
-    updateTranslations(); 
 }
 
 function printStyledInvoice() {
@@ -636,6 +616,26 @@ async function sendAndRemove(sku, qty, isFrame, btnElement) {
     }
 }
 
+function exportExcel() {
+    if (inventory.length === 0) { showToast(i18n[currentLang].empty, 'error'); return; }
+    const ws = XLSX.utils.json_to_sheet(inventory);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Records");
+    // Mobile-friendly binary download
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    const blob = new Blob([wbout], {type:"application/octet-stream"});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = "NoorGlass_Inventory_" + new Date().toISOString().slice(0,10) + ".xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    showToast(i18n[currentLang].saved_msg, 'success');
+}
+
 function updateTranslations() { 
     document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); 
     
@@ -643,10 +643,10 @@ function updateTranslations() {
     const updatesContainer = document.getElementById('updates-content');
     if(updatesContainer) updatesContainer.innerHTML = i18n[currentLang].updates_html;
 
-    calculateEvents(); updateSettingsButtons(); 
+    updateSettingsButtons(); 
 }
 
-function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateTranslations(); renderList(); document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('update-date-text').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }); calculateEvents(); }
+function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateTranslations(); renderList(); document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('update-date-text').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
 
 function updateSettingsButtons() {
     if(document.getElementById('setting-theme-btn')) document.getElementById('setting-theme-btn').innerText = isDarkMode ? i18n[currentLang].t_dark : i18n[currentLang].t_light;
@@ -685,10 +685,9 @@ function fillOptions() {
 function updateAdminMenus() { document.getElementById('glass-brand-select').innerHTML = config.brands.map(b => `<option value="${b}">${b}</option>`).join(''); document.getElementById('glass-color-select').innerHTML = config.colors.map(c => `<option value="${c}">${c}</option>`).join(''); ['brands', 'colors'].forEach(cat => { document.getElementById(`list-${cat}`).innerHTML = config[cat].map((v, i) => `<div class="admin-item">${v} <span class="del-x" onclick="removeItem('${cat}',${i})">❌</span></div>`).join(''); }); }
 function addItem(cat, id) { let v = document.getElementById(id).value.trim().toUpperCase(); if(v && !config[cat].includes(v)) { config[cat].push(v); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); document.getElementById(id).value=""; } }
 function removeItem(cat, i) { config[cat].splice(i, 1); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); }
-function exportExcel() { let ws = XLSX.utils.json_to_sheet(inventory); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Records"); XLSX.writeFile(wb, "NoorGlass_Inventory.xlsx"); }
 function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); if(btn) btn.classList.add('active'); }
 
-fillOptions(); updateAdminMenus(); generateLive('lens'); generateLive('frame'); renderList(); updateTranslations(); calculateEvents();
+fillOptions(); updateAdminMenus(); generateLive('lens'); generateLive('frame'); renderList(); updateTranslations();
 </script>
 </body>
 </html>
