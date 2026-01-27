@@ -1,6 +1,16 @@
-{
+<link rel="manifest" href='data:application/json,{
   "short_name": "NoorGlass",
   "name": "Noor Glass Inventory System",
+  "description": "نظام شامل لإدارة مخزون العدسات والفريمات - عبد العزيز سندي",
+  "lang": "ar",
+  "dir": "rtl",
+  "id": "noor-glass-app-v1",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0d47a1",
+  "background_color": "#ffffff",
+  "categories": ["productivity", "business", "utilities"],
   "icons": [
     {
       "src": "logo.png",
@@ -8,9 +18,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "start_url": "./index.html",
-  "display": "standalone",
-  "theme_color": "#0d47a1",
-  "background_color": "#ffffff"
-}
+  ]
+}'>
