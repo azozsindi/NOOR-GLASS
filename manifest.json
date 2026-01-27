@@ -1,22 +1,693 @@
-<link rel="manifest" href='data:application/json,{
-  "short_name": "NoorGlass",
-  "name": "Noor Glass Inventory System",
-  "description": "نظام شامل لإدارة مخزون العدسات والفريمات - عبد العزيز سندي",
-  "lang": "ar",
-  "dir": "rtl",
-  "id": "noor-glass-app-v1",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#0d47a1",
-  "background_color": "#ffffff",
-  "categories": ["productivity", "business", "utilities"],
-  "icons": [
-    {
-      "src": "logo.png",
-      "sizes": "192x192 512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="main-html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NOOR GLASS - Inventory System 2026</title>
+    
+    <link rel="manifest" href='data:application/json,{
+      "short_name": "NoorGlass",
+      "name": "Noor Glass Inventory System",
+      "description": "نظام شامل لإدارة مخزون العدسات والفريمات",
+      "lang": "ar",
+      "dir": "rtl",
+      "id": "noor-glass-app-v1",
+      "start_url": "./index.html",
+      "display": "standalone",
+      "orientation": "portrait",
+      "theme_color": "#0d47a1",
+      "background_color": "#ffffff",
+      "categories": ["productivity", "business", "utilities"],
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "192x192 512x512",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    }'>
+    
+    <meta name="theme-color" content="#0d47a1">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root { 
+            --primary: #0d47a1; --bg-body: #f4f6f9; --bg-card: #ffffff; 
+            --text-main: #333333; --text-sec: #666666; --border: #eeeeee;
+            --input-bg: #fafafa; --shadow: rgba(0,0,0,0.05);
+            --safe-top: env(safe-area-inset-top, 20px);
+            --success: #2e7d32; --danger: #d32f2f; --warning: #ed6c02;
+        }
+        [data-theme="dark"] {
+            --primary: #64b5f6; --bg-body: #121212; --bg-card: #1e1e1e;
+            --text-main: #e0e0e0; --text-sec: #aaaaaa; --border: #333333;
+            --input-bg: #2c2c2c; --shadow: rgba(0,0,0,0.5);
+            --success: #81c784; --danger: #e57373; --warning: #ffb74d;
+        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-body); margin: 0; padding-bottom: 90px; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        
+        .app-header { background: var(--bg-card); color: var(--text-main); padding: var(--safe-top) 15px 15px 15px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1001; box-shadow: 0 2px 10px var(--shadow); }
+        .header-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; letter-spacing: 1px; color: var(--primary); font-size: 1.2rem; }
+        .header-brand img { height: 40px; width: auto; display: block; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--bg-card); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 5px); }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; font-size: 10px; color: var(--text-sec); cursor: pointer; border: none; background: none; }
+        .nav-item.active { color: var(--primary); font-weight: bold; background: rgba(13, 71, 161, 0.05); border-top: 3px solid var(--primary); }
+        [data-theme="dark"] .nav-item.active { background: rgba(255,255,255,0.05); }
+        
+        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: var(--bg-card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); }
+        h2 { font-size: 1rem; color: var(--primary); margin: 0 0 15px 0; border-right: 4px solid var(--primary); padding-right: 12px; display: flex; align-items: center; }
+        [dir="ltr"] h2 { border-right: none; border-left: 4px solid var(--primary); padding-left: 12px; }
+        
+        button { background: var(--primary); color: #fff; border: none; font-weight: bold; border-radius: 10px; padding: 14px; width: 100%; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 5px; }
+        [data-theme="dark"] button { color: #000; }
+        
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); font-size: 16px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main); }
+        .reader-div { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); }
+        .barcode-box { text-align: center; background: #fff; padding: 15px; border-radius: 10px; border: 1px dashed #ccc; margin: 15px 0; }
+        .sku-label { font-family: monospace; font-weight: bold; color: var(--danger); font-size: 1.2rem; word-break: break-all; margin-bottom: 5px; }
+
+        .inventory-item { padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid var(--primary); background: var(--bg-card); box-shadow: 0 2px 8px var(--shadow); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
+        .qty-controls { display: flex; align-items: center; gap: 10px; }
+        .edit-btn { width: 32px !important; height: 32px; padding: 0 !important; border-radius: 8px !important; font-size: 18px; }
+        .qty-circle { border: 2px solid var(--primary); min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; cursor: pointer; background: rgba(13,71,161,0.1); color: var(--primary); }
+        
+        .time-widget { background: var(--input-bg); border-radius: 12px; padding: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .time-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .time-row:last-child { border-bottom: none; }
+        
+        .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; color: var(--text-main); }
+        .info-table th, .info-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .info-table th { background: var(--input-bg); color: var(--primary); }
+        
+        .guide-box { background: var(--bg-card); border: 1px dashed var(--border); padding: 15px; border-radius: 8px; font-size: 0.9rem; line-height: 1.7; color: var(--text-main); }
+        .guide-step { margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .guide-step b { color: var(--primary); display: block; margin-bottom: 5px; }
+
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-label { font-weight: bold; }
+        .setting-btn { width: auto; margin: 0; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; }
+        
+        .admin-box { margin-bottom: 20px; padding: 15px; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border); }
+        .admin-row { display: flex; gap: 10px; margin: 10px 0; }
+        .admin-item { display: inline-block; background: var(--bg-card); padding: 5px 10px; border-radius: 15px; margin: 3px; font-size: 0.85rem; border: 1px solid var(--border); }
+        .del-x { color: var(--danger); cursor: pointer; margin-right: 5px; font-weight: bold; }
+        [dir="ltr"] .del-x { margin-right: 0; margin-left: 5px; }
+
+        /* Toast Notification */
+        #toast-box { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 2000; left: 50%; transform: translateX(-50%); bottom: 80px; font-size: 16px; opacity: 0; transition: opacity 0.3s, bottom 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #toast-box.show { visibility: visible; opacity: 1; bottom: 90px; }
+        #toast-box.success { background-color: var(--success); }
+        #toast-box.error { background-color: var(--danger); }
+
+        /* Mobile-First Print Style */
+        #print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; height: 0; overflow: hidden; }
+            #print-area, #print-area * { visibility: visible; height: auto; overflow: visible; }
+            #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; z-index: 9999; background: white; color: black; direction: rtl; padding: 20px; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+            .print-table th, .print-table td { border: 1px solid #333; padding: 5px; text-align: center; }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+            @page { margin: 0.5cm; }
+        }
+    </style>
+</head>
+<body onclick="initAudio()">
+
+<div id="toast-box"></div>
+
+<div class="app-header">
+    <div class="header-brand">
+        <img src="logo.png" alt="Logo">
+        <span>NOOR GLASS</span>
+    </div>
+</div>
+
+<div id="page-home" class="page active">
+    <div class="card home-hero">
+        <img src="logo.png" alt="Logo" style="width:80px; margin-bottom:10px;">
+        <div style="font-size:1.2rem; font-weight:bold;">NOOR GLASS</div>
+        <div style="color:var(--text-sec); margin-bottom:15px;" id="current-date">---</div>
+        
+        <div class="time-widget">
+            <div class="time-row">
+                <span style="color:var(--text-sec); font-weight:bold;">🟢 <span data-i18n="current_login">وقت الدخول:</span></span>
+                <span style="color:var(--success); font-family:monospace; font-weight:bold;" id="login-time-span">---</span>
+            </div>
+            <div class="time-row">
+                <span style="color:var(--text-sec); font-weight:bold;">🔴 <span data-i18n="last_visit">آخر زيارة:</span></span>
+                <span style="color:var(--danger); font-family:monospace; font-weight:bold;" id="last-visit-span">---</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="u_title">🆕 آخر التحديثات</h2>
+        <div style="background:rgba(255,193,7,0.1); padding:10px; border-radius:10px; font-size:0.85rem; line-height:1.6; max-height:300px; overflow-y:auto;">
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">📅 <span data-i18n="update_date_lbl">تاريخ التحديث:</span> <span id="update-date-text"></span></p>
+            <div id="updates-content"></div>
+        </div>
+        <div onclick="showPage('page-info', document.getElementById('nav-info-btn'))" style="text-align:center; margin-top:15px; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:bold;">📖 <span data-i18n="open_guide">فتح الدليل التفصيلي</span></div>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="contact_us">📞 تواصل معنا</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <a href="tel:0547002821" style="background:#2b5a9b; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">📞 Call</a>
+            <a href="https://wa.me/966547002821" style="background:#25D366; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">💬 WhatsApp</a>
+            <a href="https://docs.google.com/spreadsheets/d/1EMk7X4k60cguwVm2Jvks8WoIB7J9uEyvkcPdSqZwWlY/edit?usp=sharing" target="_blank" style="background:#1d6f42; grid-column:span 2; padding:15px; border-radius:10px; color:white; text-align:center; text-decoration:none;">📊 Google Sheet</a>
+        </div>
+    </div>
+</div>
+
+<div id="page-extras" class="page">
+    <div class="card">
+        <h2 style="color:var(--primary);" data-i18n="notes_title">📝 دفتر الملاحظات</h2>
+        <textarea id="user-notes" style="width:100%; height:300px; padding:15px; border-radius:10px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main); font-size:1rem; line-height:1.5;" oninput="saveNotesDebounced()"></textarea>
+    </div>
+</div>
+
+<div id="page-generate" class="page">
+    <div class="card">
+        <h2 data-i18n="add_item">➕ جرد العدسات</h2>
+        <button id="scan-btn-lens" style="background:var(--text-main); color:var(--bg-card);" onclick="toggleScanner('lens')">📷 <span data-i18n="open_scanner">Scan</span></button>
+        <div id="reader-lens" class="reader-div"></div>
+        <select id="type" onchange="generateLive('lens')">
+            <option value="BCG" data-sign="P">BCG (P) Blue Cut Green</option>
+            <option value="BCG" data-sign="M">BCG (M) Blue Cut Green</option>
+            <option value="BCB" data-sign="P">BCB (P) Blue Cut Blue</option>
+            <option value="BCB" data-sign="M">BCB (M) Blue Cut Blue</option>
+            <option value="PGX" data-sign="P">PGX (P) Photochromic</option>
+            <option value="PGX" data-sign="M">PGX (M) Photochromic</option>
+            <option value="PLY" data-sign="P">PLY (P) Polycarbonate</option>
+            <option value="PLY" data-sign="M">PLY (M) Polycarbonate</option>
+            <option value="MCC" data-sign="P">MCC (P) Anti-Reflection</option>
+            <option value="MCC" data-sign="M">MCC (M) Anti-Reflection</option>
+            <option value="UCC" data-sign="P">UCC (P) White Lens</option>
+            <option value="UCC" data-sign="M">UCC (M) White Lens</option>
+        </select>
+        <div style="display:flex; gap:8px;">
+            <select id="sph" onchange="generateLive('lens')"></select>
+            <select id="cyl" onchange="generateLive('lens')"></select>
+        </div>
+        <div class="barcode-box"><div id="sku-text-lens" class="sku-label">---</div><svg id="barcode-svg-lens"></svg></div>
+        <input id="qty-lens" type="number" value="1" min="1">
+        <button onclick="addToInventory('lens')" data-i18n="save">حفظ</button>
+    </div>
+</div>
+
+<div id="page-glasses" class="page">
+    <div class="card">
+        <h2 style="color:var(--success);" data-i18n="glass_title">👓 جرد الفريمات</h2>
+        <button id="scan-btn-frame" style="background:var(--text-main); color:var(--bg-card);" onclick="toggleScanner('frame')">📷 <span data-i18n="open_scanner">Scan</span></button>
+        <div id="reader-frame" class="reader-div"></div>
+        <label data-i18n="frame_type_lbl">النوع:</label>
+        <select id="glass-type-select" onchange="clearManualAndGen('frame')">
+            <option value="MED" data-i18n="type_med">👓 طبي</option>
+            <option value="SUN" data-i18n="type_sun">🕶️ شمسي</option>
+        </select>
+        <label data-i18n="brand">الماركة:</label>
+        <select id="glass-brand-select" onchange="clearManualAndGen('frame')"></select>
+        <label data-i18n="color">اللون:</label>
+        <select id="glass-color-select" onchange="clearManualAndGen('frame')"></select>
+        <label data-i18n="factory_code_lbl">كود المصنع:</label>
+        <input id="glass-factory-code" type="text" oninput="clearManualAndGen('frame')">
+        <div class="barcode-box"><div id="sku-text-frame" class="sku-label">---</div><svg id="barcode-svg-frame"></svg></div>
+        <input id="glass-qty" type="number" value="1" min="1">
+        <button onclick="addToInventory('frame')" style="background:var(--success);" data-i18n="save">حفظ</button>
+    </div>
+</div>
+
+<div id="page-list" class="page">
+    <div class="card">
+        <h2 data-i18n="inventory">📋 السجلات</h2>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button style="background:var(--text-main); color:var(--bg-card); flex:1;" onclick="exportExcel()" data-i18n="export">📤 Excel</button>
+            <button style="background:#d32f2f; color:white; flex:1;" onclick="printStyledInvoice()" data-i18n="print_pdf">📄 PDF Print</button>
+        </div>
+        <div id="inventory-list"></div>
+    </div>
+</div>
+
+<div id="page-info" class="page">
+    <div class="card">
+        <h2 style="color:var(--warning);" data-i18n="guide_title">⭐ دليل المستخدم التفصيلي</h2>
+        <div class="guide-box">
+            <div class="guide-step">
+                <b data-i18n="gd_1_t">1. البداية والإعداد:</b>
+                <span data-i18n="gd_1_d">عند فتح التطبيق لأول مرة، اذهب إلى صفحة "الإعدادات" لضبط اللغة المناسبة، المظهر (ليلي/نهاري)، وإدخال الماركات وألوان الفريمات التي تتعامل معها، بالإضافة لتحديد نطاق مقاسات العدسات.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_2_t">2. جرد العدسات:</b>
+                <span data-i18n="gd_2_d">اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات (SPH/CYL) من القائمة. سيظهر باركود تلقائي. يمكنك مسح الباركود بالكاميرا أو إدخاله يدوياً. اضغط "حفظ" لتخزين العدسة مؤقتاً في الجهاز.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_3_t">3. جرد الفريمات:</b>
+                <span data-i18n="gd_3_d">اختر "طبي" أو "شمسي"، ثم الماركة واللون. يمكنك إضافة "كود المصنع" الموجود على ذراع النظارة لتمييزها بدقة. النظام سينشئ كوداً فريداً لكل نظارة.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_4_t">4. إدارة السجلات:</b>
+                <span data-i18n="gd_4_d">في صفحة "السجلات"، ستجد كل ما قمت بجرده. يمكنك تعديل الكمية بالضغط على الرقم، أو حذف الصنف إذا كانت الكمية 0. تأكد من مراجعة البيانات قبل الإرسال.</span>
+            </div>
+            <div class="guide-step">
+                <b data-i18n="gd_5_t">5. إنهاء الجرد:</b>
+                <span data-i18n="gd_5_d">اضغط على زر "إرسال وحذف" بجانب كل صنف لترحيله إلى ملف Google Sheets وحذفه من هاتفك. يمكنك أيضاً طباعة تقرير PDF أو استخراج ملف Excel كنسخة احتياطية.</span>
+            </div>
+        </div>
+        
+        <h2 data-i18n="h_anatomy">1. هيكل كود العدسة</h2>
+        <p style="font-size:0.85rem;">(النوع + الإشارة + القوة + السلندر)</p>
+        <div class="code-example">BCGM000000</div>
+        
+        <h2 data-i18n="h_anatomy_frame">2. هيكل كود الفريم (Smart SKU)</h2>
+        <p style="font-size:0.85rem;">هو كود ذكي يجمع مواصفات الفريم لتسهيل القراءة:</p>
+        <div class="code-example" style="background:#e3f2fd; color:#0d47a1;">MED + PRADA + GOLD</div>
+        <p style="font-size:0.8rem; margin-top:5px;">(طبي + الماركة + اللون)</p>
+
+        <h2 data-i18n="h_table">3. جدول المصطلحات الشامل</h2>
+        <table class="info-table">
+            <thead><tr><th>الرمز</th><th>المعنى (عربي / انجليزي)</th></tr></thead>
+            <tbody>
+                <tr><td>P / M</td><td>Plus (+) / Minus (-)</td></tr>
+                <tr><td>BCG</td><td>Blue Cut Green (حماية أزرق - أخضر)</td></tr>
+                <tr><td>BCB</td><td>Blue Cut Blue (حماية أزرق - أزرق)</td></tr>
+                <tr><td>PGX</td><td>Photochromic (فوتو شمسي)</td></tr>
+                <tr><td>PLY</td><td>Polycarbonate (ضد الكسر)</td></tr>
+                <tr><td>MCC</td><td>Anti-Reflection (مقاوم للانعكاس)</td></tr>
+                <tr><td>UCC</td><td>White Lens (عدسة بيضاء عادية)</td></tr>
+                <tr><td>MED</td><td>Medical Frame (فريم طبي)</td></tr>
+                <tr><td>SUN</td><td>Sunglasses (نظارة شمسية)</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="page-admin" class="page">
+    <div class="card">
+        <h2 data-i18n="admin_general">⚙️ الإعدادات العامة</h2>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="mode_label">المظهر:</span>
+            <button id="setting-theme-btn" class="setting-btn" onclick="toggleTheme()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--border);">🌗</button>
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lang_label">اللغة:</span>
+            <button id="setting-lang-btn" class="setting-btn" onclick="toggleLang()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--border);">English</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="admin_lens_config">📏 إعدادات مقاسات العدسات</h2>
+        <div class="guide-box" style="margin-bottom:15px; font-size:0.8rem; color:var(--text-sec);">
+            <span data-i18n="lens_hint">تحكم في نطاق المقاسات التي تظهر في القوائم.</span>
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lbl_max_pos">أعلى مقاس موجب (+):</span>
+            <input type="number" id="cfg-lens-max" value="6.00" step="0.25" style="width:80px; text-align:center;">
+        </div>
+        <div class="setting-row">
+            <span class="setting-label" data-i18n="lbl_max_neg">أعلى مقاس سالب (-):</span>
+            <input type="number" id="cfg-lens-min" value="-6.00" step="0.25" style="width:80px; text-align:center;">
+        </div>
+        <button onclick="updateLensConfig()" style="background:var(--primary); margin-top:10px;" data-i18n="update_lens_range">تحديث النطاق</button>
+    </div>
+
+    <div class="card">
+        <h2 data-i18n="admin_inv">👓 إدارة بيانات الفريمات</h2>
+        <div class="admin-box">
+            <b data-i18n="m_brands">1. قائمة الماركات المعتمدة:</b>
+            <div class="admin-row"><input id="in-brand" type="text" placeholder="مثال: RAYBAN"><button onclick="addItem('brands','in-brand')" style="width:40px;">+</button></div>
+            <div id="list-brands"></div>
+        </div>
+        <div class="admin-box">
+            <b data-i18n="m_colors">2. قائمة الألوان المعتمدة:</b>
+            <div class="admin-row"><input id="in-color" type="text" placeholder="مثال: GOLD"><button onclick="addItem('colors','in-color')" style="width:40px;">+</button></div>
+            <div id="list-colors"></div>
+        </div>
+    </div>
+</div>
+
+<div id="print-area">
+    <div class="print-header">
+        <img src="logo.png" class="print-logo" style="height:60px;">
+        <div class="print-title" style="font-size:1.5rem; font-weight:bold; color:#0d47a1;">NOOR GLASS INVENTORY</div>
+        <div class="print-meta" style="border-bottom:1px solid #ccc; padding-bottom:10px; margin-bottom:10px;">
+            <span id="print-date"></span> | Generated by Abdulaziz Sindi
+        </div>
+    </div>
+    <table class="print-table">
+        <thead><tr><th>SKU</th><th>Qty</th><th>Type</th></tr></thead>
+        <tbody id="print-body"></tbody>
+    </table>
+</div>
+
+<nav class="bottom-nav">
+    <button class="nav-item active" onclick="showPage('page-home', this)">🏠 <br><span data-i18n="nav_home">الرئيسية</span></button>
+    <button class="nav-item" onclick="showPage('page-generate', this)">🔍 <br><span data-i18n="nav_add">عدسات</span></button>
+    <button class="nav-item" onclick="showPage('page-glasses', this)">👓 <br><span data-i18n="nav_glasses">فريمات</span></button>
+    <button class="nav-item" onclick="showPage('page-list', this)">📋 <br><span data-i18n="nav_list">السجلات</span></button>
+    <button class="nav-item" onclick="showPage('page-extras', this)">📝 <br><span data-i18n="nav_extras">ملاحظات</span></button>
+    <button id="nav-info-btn" class="nav-item" onclick="showPage('page-info', this)">ℹ️ <br><span data-i18n="nav_info">دليل</span></button>
+    <button class="nav-item" onclick="showPage('page-admin', this)">⚙️ <br><span data-i18n="nav_admin">إعدادات</span></button>
+</nav>
+
+<script>
+let currentLang = 'ar';
+let inventory = JSON.parse(localStorage.getItem("noor_glass_v2026_final")) || [];
+let config = JSON.parse(localStorage.getItem("noor_config")) || { 
+    brands: ["RAY-BAN", "GUCCI", "PRADA", "TOM FORD"], 
+    colors: ["BLACK", "GOLD", "SILVER", "BROWN"],
+    lensMax: 6.00,
+    lensMin: -6.00
+};
+
+let html5QrCode = null; let audioCtx = null; let isScannerRunning = false; let scannedLensSku = null; let scannedFrameSku = null;
+let isDarkMode = localStorage.getItem('noor_theme') === 'dark';
+let noteSaveTimeout; // For Debouncing
+
+if(isDarkMode) document.body.setAttribute('data-theme', 'dark');
+
+// Time Logic
+const now = new Date();
+const nowStr = now.toLocaleString('ar-SA', {weekday:'short', hour:'2-digit', minute:'2-digit'});
+document.getElementById('login-time-span').innerText = nowStr;
+document.getElementById('last-visit-span').innerText = localStorage.getItem("noor_last_visit_time") || "First Visit";
+localStorage.setItem("noor_last_visit_time", nowStr);
+
+document.getElementById('user-notes').value = localStorage.getItem('noor_notes') || "";
+const sheetURL = "https://script.google.com/macros/s/AKfycbyzHsBxSSbqWAT2WVbsVEC-JQ4QRNT7iXskHsQNQLnfVA-XyiFMDblXXsgE65hjzTeUCg/exec";
+document.getElementById('current-date').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+document.getElementById('update-date-text').innerText = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const i18n = {
+    ar: {
+        nav_home: "الرئيسية", nav_add: "عدسات", nav_glasses: "فريمات", nav_list: "السجلات", nav_info: "دليل", nav_admin: "إعدادات", nav_extras: "ملاحظات",
+        welcome: "NOOR GLASS", u_title: "🆕 آخر التحديثات", open_guide: "📖 الدليل التفصيلي",
+        u1: "إطلاق النظام الشامل.", u2: "الوضع الليلي.", u3: "طباعة PDF.", u4: "مناسبات بصرية.",
+        add_item: "➕ جرد العدسات", glass_title: "👓 جرد الفريمات", admin_title: "⚙️ الإعدادات",
+        brand: "الماركة:", color: "اللون:", quantity: "الكمية:", save: "حفظ في السجل", 
+        inventory: "📋 السجلات", export: "Excel", print_pdf: "طباعة PDF", open_scanner: "فتح الماسح", close_scanner: "إغلاق",
+        saved_msg: "تم الحفظ بنجاح!", sending: "جاري الإرسال...", send_to_sheet: "إرسال وحذف", empty: "السجل فارغ",
+        contact_us: "📞 تواصل معنا", m_brands: "1. قائمة الماركات المعتمدة:", m_colors: "2. قائمة الألوان المعتمدة:",
+        frame_type_lbl: "تصنيف الفريم:", type_med: "👓 طبي", type_sun: "🕶️ شمسي",
+        factory_code_lbl: "كود المصنع (اختياري):", current_login: "وقت الدخول:", last_visit: "آخر زيارة:",
+        events_title: "📅 مناسبات (2026)", notes_title: "📝 دفتر الملاحظات", notes_desc: "حفظ تلقائي:",
+        guide_title: "⭐ دليل المستخدم التفصيلي", h_anatomy: "1. هيكل كود العدسة", h_anatomy_frame: "2. هيكل كود الفريم (Smart SKU)", h_table: "3. جدول المصطلحات الشامل", h_reading: "4. قراءة الأرقام",
+        gd_1_t: "1. البداية والإعداد:", gd_1_d: "عند فتح التطبيق لأول مرة، اذهب إلى صفحة 'الإعدادات' لضبط اللغة، المظهر، وإدخال بيانات الفريمات ونطاق العدسات.",
+        gd_2_t: "2. جرد العدسات:", gd_2_d: "اختر نوع العدسة (مثلاً BCG P)، ثم حدد المقاسات. سيظهر باركود تلقائي. اضغط 'حفظ' للتخزين.",
+        gd_3_t: "3. جرد الفريمات:", gd_3_d: "اختر 'طبي' أو 'شمسي'، ثم الماركة واللون. أضف كود المصنع لتمييز النظارة.",
+        gd_4_t: "4. إدارة السجلات:", gd_4_d: "في صفحة السجلات، يمكنك تعديل الكمية أو الحذف. البيانات هنا محفوظة في هاتفك.",
+        gd_5_t: "5. إنهاء الجرد:", gd_5_d: "اضغط 'إرسال وحذف' لترحيل البيانات إلى السحابة وتنظيف جهازك.",
+        dev_by: "تم صنع هذا النظام من قبل عبد العزيز سندي 2026", dua: "(اللهم اجعل عملي شفيعاً لي يوم أسأل عن شبابي فيما أفنيته)",
+        err_qty: "خطأ: الكمية يجب أن تكون أكبر من 0", saved_sent: "تم الإرسال بنجاح!", err_send: "خطأ في الاتصال، حاول مجدداً",
+        admin_general: "⚙️ الإعدادات العامة", admin_inv: "👓 إدارة بيانات الفريمات", mode_label: "المظهر:", lang_label: "اللغة:", t_light: "☀️ نهاري", t_dark: "🌙 ليلي",
+        admin_lens_config: "📏 إعدادات مقاسات العدسات", lens_hint: "تحكم في نطاق المقاسات التي تظهر في القوائم.",
+        lbl_max_pos: "أعلى مقاس موجب (+):", lbl_max_neg: "أعلى مقاس سالب (-):", update_lens_range: "تحديث نطاق المقاسات",
+        range_updated: "تم تحديث نطاق العدسات!", update_date_lbl: "تاريخ التحديث:",
+        updates_html: `
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">أهلاً بك، إليك أبرز التحديثات:</p>
+            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
+                <li style="margin-bottom:12px;"><strong>1. نظام جرد الفريمات (Frames Inventory):</strong><br>تصنيف ذكي (طبي/شمسي) وإمكانية اختيار (الماركة، اللون، وكود المصنع) لإنشاء باركود فريد.</li>
+                <li style="margin-bottom:12px;"><strong>2. الإدارة الذكية لمقاسات العدسات:</strong><br>إضافة لوحة تحكم لتحديد نطاق المقاسات (أعلى وأقل مقاس).</li>
+                <li style="margin-bottom:12px;"><strong>3. تحسينات واجهة المستخدم (UI/UX):</strong><br>دعم الوضع الليلي (Dark Mode) وتنبيهات فورية ملونة.</li>
+                <li style="margin-bottom:12px;"><strong>4. الرقابة والتدقيق (Tracking):</strong><br>سجل دقيق لوقت الدخول وآخر زيارة.</li>
+                <li style="margin-bottom:12px;"><strong>5. تطوير نظام الـ SKU والباركود:</strong><br>تنسيق احترافي للكود ودعم طباعة SVG.</li>
+                <li style="margin-bottom:5px;"><strong>6. الربط السحابي والنسخ الاحتياطي:</strong><br>تحسين سرعة الإرسال لـ Google Sheets.</li>
+            </ul>`
+    },
+    en: {
+        nav_home: "Home", nav_add: "Lenses", nav_glasses: "Frames", nav_list: "Records", nav_info: "Guide", nav_admin: "Admin", nav_extras: "Notes",
+        welcome: "NOOR GLASS", u_title: "🆕 Updates", open_guide: "📖 Detailed Guide",
+        u1: "System Launch.", u2: "Dark Mode.", u3: "PDF Print.", u4: "Optical Events.",
+        add_item: "➕ Lens Inventory", glass_title: "👓 Frame Inventory", admin_title: "⚙️ Settings",
+        brand: "Brand:", color: "Color:", quantity: "Qty:", save: "Save", 
+        inventory: "📋 Records", export: "Excel", print_pdf: "Print PDF", open_scanner: "Scan", close_scanner: "Close",
+        saved_msg: "Saved Successfully!", sending: "Sending...", send_to_sheet: "Send & Delete", empty: "Empty", 
+        contact_us: "📞 Contact Us", m_brands: "1. Approved Brands List:", m_colors: "2. Approved Colors List:",
+        frame_type_lbl: "Frame Type:", type_med: "👓 Medical", type_sun: "🕶️ Sunglasses",
+        factory_code_lbl: "Factory Code:", current_login: "Login:", last_visit: "Last:",
+        events_title: "📅 Events (2026)", notes_title: "📝 Notepad", notes_desc: "Auto-saved:",
+        guide_title: "⭐ Detailed User Guide", h_anatomy: "1. Lens Code", h_anatomy_frame: "2. Frame Code (Smart SKU)", h_table: "3. Complete Terminology", h_reading: "4. Reading Numbers",
+        gd_1_t: "1. Setup:", gd_1_d: "Go to Settings to set Language, Theme, Frame Data, and Lens Power Ranges.",
+        gd_2_t: "2. Lens Inventory:", gd_2_d: "Select Lens Type, Power (SPH/CYL). Scan or auto-generate code. Click Save.",
+        gd_3_t: "3. Frame Inventory:", gd_3_d: "Select Medical/Sun, Brand, and Color. Add Factory Code for precision.",
+        gd_4_t: "4. Records:", gd_4_d: "Edit or Delete items locally before sending.",
+        gd_5_t: "5. Finish:", gd_5_d: "Click 'Send & Delete' to upload data to the cloud and clear your device.",
+        dev_by: "Dev: Abdulaziz Sindi 2026", dua: "(O Allah accept my work)",
+        err_qty: "Error: Qty must be > 0", saved_sent: "Sent Successfully!", err_send: "Connection Error",
+        admin_general: "⚙️ General Settings", admin_inv: "👓 Frame Data Management", mode_label: "Theme:", lang_label: "Language:", t_light: "☀️ Light", t_dark: "🌙 Dark",
+        admin_lens_config: "📏 Lens Size Config", lens_hint: "Control the power range displayed in lists.",
+        lbl_max_pos: "Max Plus Power (+):", lbl_max_neg: "Max Minus Power (-):", update_lens_range: "Update Range",
+        range_updated: "Lens Range Updated!", update_date_lbl: "Update Date:",
+        updates_html: `
+            <p style="margin-top:0; font-weight:bold; color:var(--primary);">Welcome. Here are the updates:</p>
+            <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
+                <li style="margin-bottom:12px;"><strong>1. Frames Inventory:</strong><br>Smart classification (Medical/Sun) with custom Brand, Color, and Factory Code for unique barcodes.</li>
+                <li style="margin-bottom:12px;"><strong>2. Lens Power Management:</strong><br>Admin panel to set Max/Min lens power ranges dynamically.</li>
+                <li style="margin-bottom:12px;"><strong>3. UI/UX Improvements:</strong><br>Dark Mode support, new bottom nav, and toast notifications.</li>
+                <li style="margin-bottom:12px;"><strong>4. Tracking:</strong><br>Precise login and last visit logging.</li>
+                <li style="margin-bottom:12px;"><strong>5. SKU & Barcode:</strong><br>Professional SKU format and clear SVG barcode printing.</li>
+                <li style="margin-bottom:5px;"><strong>6. Cloud & Backup:</strong><br>Improved Google Sheets syncing and Excel export.</li>
+            </ul>`
     }
-  ]
-}'>
+};
+
+function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playBeep() { if (audioCtx) { let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(0.1, audioCtx.currentTime); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.1); } if (navigator.vibrate) navigator.vibrate(200); }
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById("toast-box");
+    toast.className = "show";
+    if(type === 'error') toast.classList.add("error"); else toast.classList.add("success");
+    toast.innerText = message;
+    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+}
+
+function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    if(isDarkMode) document.body.setAttribute('data-theme', 'dark'); else document.body.removeAttribute('data-theme');
+    localStorage.setItem('noor_theme', isDarkMode ? 'dark' : 'light');
+    updateSettingsButtons();
+}
+
+// Optimization: Debounce save to prevent lag while typing
+function saveNotesDebounced() {
+    clearTimeout(noteSaveTimeout);
+    noteSaveTimeout = setTimeout(() => {
+        localStorage.setItem('noor_notes', document.getElementById('user-notes').value);
+    }, 500); 
+}
+
+function printStyledInvoice() {
+    const tbody = document.getElementById('print-body'); tbody.innerHTML = '';
+    document.getElementById('print-date').innerText = new Date().toLocaleString();
+    inventory.forEach(item => {
+        let typeLabel = item.isFrame ? "Frame" : "Lens";
+        tbody.innerHTML += `<tr><td style="font-family:monospace; font-weight:bold;">${item.sku}</td><td>${item.qty}</td><td>${typeLabel}</td></tr>`;
+    });
+    window.print();
+}
+
+function toggleScanner(mode) {
+    const btn = document.getElementById(mode === 'lens' ? 'scan-btn-lens' : 'scan-btn-frame');
+    const readerDiv = document.getElementById(mode === 'lens' ? 'reader-lens' : 'reader-frame');
+    if (!isScannerRunning) {
+        readerDiv.style.display = 'block'; html5QrCode = new Html5Qrcode(readerDiv.id);
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
+            playBeep(); if(mode === 'lens') processLensCode(text); else processFrameCode(text); stopScanner(mode);
+        }, () => {}).then(() => { isScannerRunning = true; btn.style.background = "var(--danger)"; btn.innerHTML = `🚫 <span>${i18n[currentLang].close_scanner}</span>`; });
+    } else { stopScanner(mode); }
+}
+
+function stopScanner(mode) {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            document.getElementById('reader-lens').style.display = 'none'; document.getElementById('reader-frame').style.display = 'none';
+            isScannerRunning = false; document.getElementById('scan-btn-lens').style.background = "var(--text-main)"; document.getElementById('scan-btn-frame').style.background = "var(--text-main)";
+            updateTranslations();
+        });
+    }
+}
+
+function processLensCode(code) {
+    let clean = code.trim().replace(/\s+/g, "");
+    if (/^[A-Z]{3}[PM]/.test(clean)) {
+        scannedLensSku = null; let type = clean.substring(0, 3); let signChar = clean.substring(3, 4); let rest = clean.substring(4);
+        let sel = document.getElementById('type');
+        for(let i=0; i<sel.options.length; i++){ if(sel.options[i].value === type && sel.options[i].getAttribute('data-sign') === signChar){ sel.selectedIndex = i; break; } }
+        let sphStr, cylStr; let firstIsLetter = /^[PM]/.test(rest);
+        if (firstIsLetter) { sphStr = rest.substring(0, 4); rest = rest.substring(4); } else { sphStr = rest.substring(0, 3); rest = rest.substring(3); }
+        cylStr = rest;
+        const conv = (s) => { if (s === "000") return "0.00"; return (s[0] === 'P' ? '' : '-') + (parseInt(s.substring(1)) / 100).toFixed(2); };
+        document.getElementById('sph').value = conv(sphStr); document.getElementById('cyl').value = conv(cylStr); generateLive('lens');
+    } else { scannedLensSku = clean; document.getElementById("sku-text-lens").innerText = clean; JsBarcode("#barcode-svg-lens", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); }
+}
+
+function processFrameCode(code) { let clean = code.trim(); scannedFrameSku = clean; document.getElementById("sku-text-frame").innerText = clean; JsBarcode("#barcode-svg-frame", clean, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); }
+function clearManualAndGen(mode) { if(mode === 'lens') { scannedLensSku = null; generateLive('lens'); } else { scannedFrameSku = null; generateLive('frame'); } }
+
+function generateLive(mode) {
+    if (mode === 'lens') {
+        if (scannedLensSku) return scannedLensSku;
+        const t = document.getElementById("type").value; const typeOption = document.getElementById("type").selectedOptions[0]; const typeSign = typeOption.getAttribute('data-sign');
+        const f = (v) => { let val = parseFloat(v); if (val === 0) return "000"; return (val > 0 ? "P" : "M") + Math.abs(val).toFixed(2).replace(".", ""); };
+        const sku = `${t}${typeSign}${f(document.getElementById("sph").value)}${f(document.getElementById("cyl").value)}`;
+        document.getElementById("sku-text-lens").innerText = sku; JsBarcode("#barcode-svg-lens", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); return sku;
+    } else {
+        if (scannedFrameSku) return scannedFrameSku;
+        const type = document.getElementById('glass-type-select').value; const b = document.getElementById('glass-brand-select').value; const c = document.getElementById('glass-color-select').value; const factoryCode = document.getElementById('glass-factory-code').value.trim().toUpperCase().replace(/\s+/g, "");
+        let sku = `${type}${b}${c}`; if(factoryCode) { sku += `${factoryCode}`; }
+        document.getElementById("sku-text-frame").innerText = sku; JsBarcode("#barcode-svg-frame", sku, { format: "CODE128", width: 1.5, height: 40, displayValue: false }); return sku;
+    }
+}
+
+function addToInventory(mode) {
+    let sku, qty, isFrame;
+    if(mode === 'lens') { 
+        sku = scannedLensSku || generateLive('lens'); 
+        qty = parseInt(document.getElementById("qty-lens").value) || 0; 
+        isFrame = false; 
+    } else { 
+        sku = scannedFrameSku || generateLive('frame'); 
+        qty = parseInt(document.getElementById("glass-qty").value) || 0; 
+        isFrame = true; 
+    }
+
+    if (qty <= 0) {
+        showToast(i18n[currentLang].err_qty, 'error');
+        return;
+    }
+
+    if(mode === 'lens') {
+        scannedLensSku = null; document.getElementById("qty-lens").value = 1; generateLive('lens'); 
+    } else {
+        scannedFrameSku = null; document.getElementById("glass-qty").value = 1; document.getElementById("glass-factory-code").value = ""; generateLive('frame'); 
+    }
+    
+    updateLocalInventory(sku, qty, isFrame); 
+    showToast(i18n[currentLang].saved_msg, 'success');
+}
+
+function updateLocalInventory(sku, qtyChange, isFrame) {
+    let now = new Date().toLocaleString('en-GB'); let idx = inventory.findIndex(i => i.sku === sku);
+    if(idx > -1) { inventory[idx].qty += qtyChange; if(inventory[idx].qty <= 0) inventory.splice(idx, 1); } else if (qtyChange > 0) { inventory.unshift({ sku, qty: qtyChange, date: now, isFrame: isFrame }); }
+    localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList();
+}
+
+function editQtyManually(sku, currentQty, isFrame) {
+    let newQty = prompt(i18n[currentLang].enter_new_qty || "Enter new Qty", currentQty);
+    if (newQty !== null) { let parsed = parseInt(newQty); if (!isNaN(parsed) && parsed > 0) { let idx = inventory.findIndex(i => i.sku === sku); if (idx > -1) { inventory[idx].qty = parsed; localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList(); } } else if (parsed === 0) { if(confirm("Delete item?")) { let idx = inventory.findIndex(i => i.sku === sku); if (idx > -1) { inventory.splice(idx, 1); localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); renderList(); } } } }
+}
+
+function renderList() {
+    const l = document.getElementById("inventory-list"); l.innerHTML = "";
+    if(inventory.length === 0) { l.innerHTML = `<p style="text-align:center; color:var(--text-sec); padding:20px;">${i18n[currentLang].empty}</p>`; return; }
+    const lenses = inventory.filter(i => !i.isFrame); const frames = inventory.filter(i => i.isFrame);
+    if (lenses.length > 0) { l.innerHTML += `<div class="section-divider">Lenses</div>`; lenses.forEach(item => l.innerHTML += getItemHTML(item)); }
+    if (frames.length > 0) { l.innerHTML += `<div class="section-divider">Frames</div>`; frames.forEach(item => l.innerHTML += getItemHTML(item)); }
+}
+
+function getItemHTML(item) {
+    return `<div class="inventory-item"><div style="display:flex; justify-content:space-between; align-items:center;"><div><b>${item.sku}</b><div style="font-size:10px; color:var(--text-sec);">⏰ ${item.date}</div></div><div class="qty-controls"><button class="edit-btn" style="background:var(--danger); color:white;" onclick="updateLocalInventory('${item.sku}', -1, ${item.isFrame})">-</button><div class="qty-circle" onclick="editQtyManually('${item.sku}', ${item.qty}, ${item.isFrame})">${item.qty}</div><button class="edit-btn" style="background:var(--success); color:white;" onclick="updateLocalInventory('${item.sku}', 1, ${item.isFrame})">+</button></div></div><button style="width:100%; margin-top:10px; background:var(--success); color:white; border-radius:8px; padding:8px; border:none;" onclick="sendAndRemove('${item.sku}', ${item.qty}, ${item.isFrame}, this)">📤 ${i18n[currentLang].send_to_sheet}</button></div>`;
+}
+
+async function sendAndRemove(sku, qty, isFrame, btnElement) {
+    btnElement.disabled = true; btnElement.style.opacity = "0.5"; btnElement.innerText = i18n[currentLang].sending;
+    let now = new Date().toLocaleString('en-GB');
+    try { 
+        await fetch(sheetURL, { method: "POST", mode: "no-cors", body: JSON.stringify({ sku: sku, qty: qty.toString(), date: now, type: isFrame ? 'frame' : 'lens' }) }); 
+        inventory = inventory.filter(item => item.sku !== sku); 
+        localStorage.setItem("noor_glass_v2026_final", JSON.stringify(inventory)); 
+        renderList(); 
+        showToast(i18n[currentLang].saved_sent, 'success');
+    } catch (e) { 
+        showToast(i18n[currentLang].err_send, 'error'); 
+        btnElement.disabled = false; btnElement.style.opacity = "1"; 
+    }
+}
+
+function exportExcel() {
+    if (inventory.length === 0) { showToast(i18n[currentLang].empty, 'error'); return; }
+    const ws = XLSX.utils.json_to_sheet(inventory);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Records");
+    // Mobile-friendly binary download
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    const blob = new Blob([wbout], {type:"application/octet-stream"});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = "NoorGlass_Inventory_" + new Date().toISOString().slice(0,10) + ".xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    showToast(i18n[currentLang].saved_msg, 'success');
+}
+
+function updateTranslations() { 
+    document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(i18n[currentLang][key]) el.innerText = i18n[currentLang][key]; }); 
+    
+    // Inject updates HTML safely
+    const updatesContainer = document.getElementById('updates-content');
+    if(updatesContainer) updatesContainer.innerHTML = i18n[currentLang].updates_html;
+
+    updateSettingsButtons(); 
+}
+
+function toggleLang() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr'; updateTranslations(); renderList(); document.getElementById('current-date').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('update-date-text').innerText = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
+
+function updateSettingsButtons() {
+    if(document.getElementById('setting-theme-btn')) document.getElementById('setting-theme-btn').innerText = isDarkMode ? i18n[currentLang].t_dark : i18n[currentLang].t_light;
+    if(document.getElementById('setting-lang-btn')) document.getElementById('setting-lang-btn').innerText = currentLang === 'ar' ? 'English' : 'العربية';
+    // populate config inputs
+    document.getElementById('cfg-lens-max').value = config.lensMax || 6.00;
+    document.getElementById('cfg-lens-min').value = config.lensMin || -6.00;
+}
+
+function updateLensConfig() {
+    let max = parseFloat(document.getElementById('cfg-lens-max').value);
+    let min = parseFloat(document.getElementById('cfg-lens-min').value);
+    if(isNaN(max) || isNaN(min)) return;
+    config.lensMax = max;
+    config.lensMin = min;
+    localStorage.setItem("noor_config", JSON.stringify(config));
+    fillOptions(); // refresh dropdowns
+    showToast(i18n[currentLang].range_updated, 'success');
+}
+
+function fillOptions() { 
+    const s = document.getElementById('sph'), c = document.getElementById('cyl'); 
+    s.innerHTML = ""; c.innerHTML = "";
+    // Ensure defaults if missing
+    let max = config.lensMax !== undefined ? config.lensMax : 6.00;
+    let min = config.lensMin !== undefined ? config.lensMin : -6.00;
+    
+    for (let i = max; i >= min; i -= 0.25) { 
+        let l = (i > 0 ? "+" : "") + i.toFixed(2); 
+        s.add(new Option(l, i.toFixed(2))); 
+        c.add(new Option(l, i.toFixed(2))); 
+    } 
+    s.value = "0.00"; c.value = "0.00"; 
+}
+
+function updateAdminMenus() { document.getElementById('glass-brand-select').innerHTML = config.brands.map(b => `<option value="${b}">${b}</option>`).join(''); document.getElementById('glass-color-select').innerHTML = config.colors.map(c => `<option value="${c}">${c}</option>`).join(''); ['brands', 'colors'].forEach(cat => { document.getElementById(`list-${cat}`).innerHTML = config[cat].map((v, i) => `<div class="admin-item">${v} <span class="del-x" onclick="removeItem('${cat}',${i})">❌</span></div>`).join(''); }); }
+function addItem(cat, id) { let v = document.getElementById(id).value.trim().toUpperCase(); if(v && !config[cat].includes(v)) { config[cat].push(v); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); document.getElementById(id).value=""; } }
+function removeItem(cat, i) { config[cat].splice(i, 1); localStorage.setItem("noor_config", JSON.stringify(config)); updateAdminMenus(); }
+function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); if(btn) btn.classList.add('active'); }
+
+fillOptions(); updateAdminMenus(); generateLive('lens'); generateLive('frame'); renderList(); updateTranslations();
+</script>
+</body>
+</html>
