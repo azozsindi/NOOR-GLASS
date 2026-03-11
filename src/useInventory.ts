@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { InventoryItem, AppConfig, DEFAULT_CONFIG, SHEET_URL, AuditEntry } from './types';
+import { toast } from 'sonner';
+import { translations } from './i18n';
 
 export function useInventory() {
   const [inventory, setInventory] = useState<InventoryItem[]>(() => {
@@ -80,13 +82,29 @@ export function useInventory() {
     };
     setInventory(prev => [newItem, ...prev]);
     addAuditEntry('ADD_ITEM', `Added ${item.type}: ${item.sku} (Qty: ${item.qty})`);
+    toast.success(translations[lang].saved_msg);
   };
 
-  const deleteItem = (id: number) => {
+  const bulkAddItems = (items: Omit<InventoryItem, 'id' | 'date'>[]) => {
+    const now = Date.now();
+    const newItems: InventoryItem[] = items.map((item, index) => ({
+      ...item,
+      id: now + index,
+      date: new Date().toLocaleString()
+    }));
+    setInventory(prev => [...newItems, ...prev]);
+    addAuditEntry('BULK_ADD', `Added ${items.length} items via bulk import`);
+    toast.success(translations[lang].import_success);
+  };
+
+  const deleteItem = (id: number, silent = false) => {
     const item = inventory.find(i => i.id === id);
     if (item) {
       setInventory(prev => prev.filter(i => i.id !== id));
       addAuditEntry('DELETE_ITEM', `Deleted ${item.sku}`);
+      if (!silent) {
+        toast.error(translations[lang].deleted_msg);
+      }
     }
   };
 
@@ -122,7 +140,8 @@ export function useInventory() {
         })
       });
       addAuditEntry('SEND_TO_SHEET', `Sent ${item.sku} to cloud`);
-      deleteItem(id);
+      toast.success(translations[lang].saved_sent);
+      deleteItem(id, true);
       return true;
     } catch (error) {
       console.error("Error sending to sheet:", error);
@@ -143,6 +162,45 @@ export function useInventory() {
     }
   };
 
+  const sendAllToSheet = async () => {
+    if (inventory.length === 0) return;
+    if (!window.confirm(lang === 'ar' ? 'هل أنت متأكد من إرسال وحذف كافة السجلات؟' : 'Are you sure you want to send and delete all records?')) return;
+    
+    const loadingToast = toast.loading(translations[lang].sending);
+    let successCount = 0;
+    
+    // Process sequentially to be safe
+    for (const item of inventory) {
+      try {
+        await fetch(SHEET_URL, {
+          method: "POST",
+          mode: 'no-cors',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sku: item.sku,
+            qty: item.qty,
+            type: item.type,
+            cost: item.cost || 0,
+            sell: item.sell || 0,
+            date: item.date
+          })
+        });
+        successCount++;
+      } catch (error) {
+        console.error("Error sending item:", item.sku, error);
+      }
+    }
+    
+    toast.dismiss(loadingToast);
+    if (successCount > 0) {
+      setInventory([]);
+      addAuditEntry('SEND_ALL_TO_SHEET', `Sent ${successCount} items to cloud and cleared inventory`);
+      toast.success(translations[lang].saved_sent);
+    } else {
+      toast.error(translations[lang].err_send);
+    }
+  };
+
   return {
     inventory,
     config,
@@ -154,10 +212,12 @@ export function useInventory() {
     notes,
     setNotes,
     addItem,
+    bulkAddItems,
     deleteItem,
     updateQty,
     sendToSheet,
     clearInventory,
-    clearAuditLog
+    clearAuditLog,
+    sendAllToSheet
   };
 }

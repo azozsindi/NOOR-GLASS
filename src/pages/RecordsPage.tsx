@@ -12,7 +12,7 @@ import { Trash2, Send, FileSpreadsheet, Search as SearchIcon, Printer, Eraser } 
 import { soundService } from '../services/soundService';
 
 export function RecordsPage() {
-  const { inventory, updateQty, deleteItem, sendToSheet, lang, config, clearInventory } = useInventory();
+  const { inventory, updateQty, deleteItem, sendToSheet, lang, config, clearInventory, sendAllToSheet } = useInventory();
   const t = translations[lang];
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +52,7 @@ export function RecordsPage() {
           <title>Print Label - ${item.sku}</title>
           <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
           <style>
-            @page { size: 50mm 30mm; margin: 0; }
+            @page { size: 30mm 10mm; margin: 0; }
             body { 
               font-family: 'Inter', sans-serif; 
               text-align: center; 
@@ -62,30 +62,23 @@ export function RecordsPage() {
               flex-direction: column; 
               align-items: center; 
               justify-content: center;
-              height: 30mm;
-              width: 50mm;
+              height: 10mm;
+              width: 30mm;
               overflow: hidden;
             }
-            .logo { font-weight: 900; font-size: 8px; margin-bottom: 1px; color: #1e3a8a; }
-            .sku { font-family: monospace; font-size: 10px; font-weight: 900; margin: 1px 0; }
-            .price { font-size: 9px; font-weight: 900; }
-            .phone { font-size: 6px; opacity: 0.7; margin-top: 1px; }
-            #barcode { width: 40mm; height: 12mm; }
+            #barcode { width: 28mm; height: 8mm; }
           </style>
         </head>
         <body>
-          <div class="logo">${config.shopName}</div>
-          <div class="sku">${item.sku}</div>
           <svg id="barcode"></svg>
-          <div class="price">Price: ${item.sell} ${config.currency}</div>
-          <div class="phone">${config.shopPhone}</div>
           <script>
             window.onload = () => {
               JsBarcode("#barcode", "${item.sku}", {
                 format: "CODE128",
-                width: 2,
-                height: 40,
-                displayValue: ${config.barcodeDisplayValue},
+                width: 1.0,
+                height: 15,
+                displayValue: true,
+                fontSize: 8,
                 margin: 0
               });
               setTimeout(() => {
@@ -216,21 +209,31 @@ export function RecordsPage() {
       </div>
 
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3">
           <button 
-            onClick={handleExportExcel}
-            className="flex-1 py-4 bg-slate-800 text-white rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            onClick={sendAllToSheet}
+            disabled={inventory.length === 0}
+            className={`w-full py-4 text-white rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform ${inventory.length === 0 ? 'bg-slate-400 opacity-50 cursor-not-allowed' : 'bg-emerald-600'}`}
           >
-            <FileSpreadsheet size={20} />
-            {t.export}
+            <Send size={20} />
+            {t.btn_send_all}
           </button>
-          <button 
-            onClick={clearInventory}
-            className="flex-1 py-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-black flex items-center justify-center gap-2 border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform"
-          >
-            <Eraser size={20} />
-            {t.btn_clear_inv}
-          </button>
+          <div className="flex gap-3">
+            <button 
+              onClick={handleExportExcel}
+              className="flex-1 py-4 bg-slate-800 text-white rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            >
+              <FileSpreadsheet size={20} />
+              {t.export}
+            </button>
+            <button 
+              onClick={clearInventory}
+              className="flex-1 py-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-black flex items-center justify-center gap-2 border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform"
+            >
+              <Eraser size={20} />
+              {t.btn_clear_inv}
+            </button>
+          </div>
         </div>
       </div>
     </div>

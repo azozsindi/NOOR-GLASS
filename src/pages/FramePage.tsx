@@ -58,42 +58,48 @@ export function FramePage() {
           <title>Print Label - ${sku}</title>
           <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
           <style>
-            @page { size: 50mm 30mm; margin: 0; }
+            @page { size: 30mm 10mm; margin: 0; }
             body { 
               font-family: 'Inter', sans-serif; 
-              text-align: center; 
               padding: 0; 
               margin: 0; 
+            }
+            .label {
               display: flex; 
               flex-direction: column; 
               align-items: center; 
               justify-content: center;
-              height: 30mm;
-              width: 50mm;
+              height: 10mm;
+              width: 30mm;
               overflow: hidden;
+              page-break-after: always;
             }
-            .logo { font-weight: 900; font-size: 8px; margin-bottom: 1px; color: #065f46; }
-            .sku { font-family: monospace; font-size: 10px; font-weight: 900; margin: 1px 0; }
-            .price { font-size: 9px; font-weight: 900; }
-            .phone { font-size: 6px; opacity: 0.7; margin-top: 1px; }
-            #barcode { width: 40mm; height: 12mm; }
+            svg { width: 28mm; height: 8mm; }
           </style>
         </head>
         <body>
-          <div class="logo">${config.shopName}</div>
-          <div class="sku">${sku}</div>
-          <svg id="barcode"></svg>
-          <div class="price">Price: ${sell || '0'} ${config.currency}</div>
-          <div class="phone">${config.shopPhone}</div>
+          <div id="labels-container"></div>
           <script>
             window.onload = () => {
-              JsBarcode("#barcode", "${sku}", {
-                format: "CODE128",
-                width: 2,
-                height: 40,
-                displayValue: ${config.barcodeDisplayValue},
-                margin: 0
-              });
+              const container = document.getElementById('labels-container');
+              const qty = ${qty};
+              for (let i = 0; i < qty; i++) {
+                const div = document.createElement('div');
+                div.className = 'label';
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.id = 'barcode-' + i;
+                div.appendChild(svg);
+                container.appendChild(div);
+                
+                JsBarcode(svg, "${sku}", {
+                  format: "CODE128",
+                  width: 1.0,
+                  height: 15,
+                  displayValue: true,
+                  fontSize: 8,
+                  margin: 0
+                });
+              }
               setTimeout(() => {
                 window.print();
                 window.close();

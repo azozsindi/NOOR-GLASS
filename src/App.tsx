@@ -15,8 +15,10 @@ import { RecordsPage } from './pages/RecordsPage';
 import { NotesPage } from './pages/NotesPage';
 import { GuidePage } from './pages/GuidePage';
 import { AdminPage } from './pages/AdminPage';
-import { Home, Search, Glasses, ClipboardList, FileText, Info, Settings, Sparkles, BarChart3 } from 'lucide-react';
+import { InventoryPage } from './pages/InventoryPage';
+import { Home, Search, Glasses, ClipboardList, FileText, Info, Settings, Sparkles, BarChart3, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Toaster } from 'sonner';
 
 import { soundService } from './services/soundService';
 
@@ -29,6 +31,23 @@ export default function App() {
     soundService.enabled = config.enableSound;
   }, [config.enableSound]);
 
+  useEffect(() => {
+    const now = new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const currentVisit = localStorage.getItem("noor_current_visit_time");
+    if (currentVisit) {
+      localStorage.setItem("noor_last_visit_time", currentVisit);
+    } else {
+      localStorage.setItem("noor_last_visit_time", lang === 'ar' ? 'زيارة أولى' : 'First Visit');
+    }
+    localStorage.setItem("noor_current_visit_time", now);
+  }, []);
+
   const navItems = [
     { id: 'home', icon: Home, label: t.nav_home },
     { id: 'updates', icon: Sparkles, label: t.nav_updates },
@@ -37,6 +56,7 @@ export default function App() {
     { id: 'frame', icon: Glasses, label: t.nav_glasses },
     { id: 'records', icon: ClipboardList, label: t.nav_list },
     { id: 'notes', icon: FileText, label: t.nav_extras },
+    { id: 'inventory', icon: Camera, label: t.nav_inventory },
     { id: 'guide', icon: Info, label: t.nav_info },
   ];
 
@@ -49,6 +69,7 @@ export default function App() {
       case 'frame': return <FramePage />;
       case 'records': return <RecordsPage />;
       case 'notes': return <NotesPage />;
+      case 'inventory': return <InventoryPage />;
       case 'guide': return <GuidePage />;
       case 'admin': return <AdminPage />;
       default: return <HomePage />;
@@ -57,6 +78,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen pb-24 safe-top safe-bottom">
+      <Toaster 
+        position={lang === 'ar' ? 'top-left' : 'top-right'} 
+        dir={lang === 'ar' ? 'rtl' : 'ltr'}
+        richColors
+        toastOptions={{
+          style: {
+            borderRadius: '1rem',
+            fontFamily: 'inherit',
+            fontWeight: 'bold'
+          }
+        }}
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="w-10" />

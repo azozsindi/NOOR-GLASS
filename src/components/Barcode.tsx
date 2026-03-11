@@ -16,7 +16,7 @@ interface BarcodeProps {
   displayValue?: boolean;
 }
 
-export function Barcode({ value, format = "CODE128", width = 2, height = 40, displayValue }: BarcodeProps) {
+export function Barcode({ value, format = "CODE128", width = 1.5, height = 25, displayValue }: BarcodeProps) {
   const { config } = useInventory();
   const svgRef = useRef<SVGSVGElement>(null);
   const finalDisplayValue = displayValue !== undefined ? displayValue : config.barcodeDisplayValue;

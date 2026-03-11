@@ -37,6 +37,14 @@ export function GuidePage() {
             <b className="text-blue-800 dark:text-blue-400 block text-base">{t.gd_5_t}</b>
             <p className="text-slate-600 dark:text-slate-400">{t.gd_5_d}</p>
           </div>
+          <div className="space-y-2">
+            <b className="text-blue-800 dark:text-blue-400 block text-base">{(t as any).gd_6_t}</b>
+            <p className="text-slate-600 dark:text-slate-400">{(t as any).gd_6_d}</p>
+          </div>
+          <div className="space-y-2">
+            <b className="text-blue-800 dark:text-blue-400 block text-base">{(t as any).gd_7_t}</b>
+            <p className="text-slate-600 dark:text-slate-400">{(t as any).gd_7_d}</p>
+          </div>
         </div>
 
         <div className="mt-8 space-y-4">
