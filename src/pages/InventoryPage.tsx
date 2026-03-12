@@ -8,13 +8,13 @@ import { useInventory } from '../useInventory';
 import { translations } from '../i18n';
 import { STOCK_SHEET_NAME } from '../types';
 import { Scanner } from '../components/Scanner';
-import { Search, Plus, Minus, Camera, Package, Send, Trash2, Filter, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Plus, Minus, Camera, Package, Send, Trash2, Filter, ChevronUp, ChevronDown, Eraser } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { soundService } from '../services/soundService';
 
 export function InventoryPage() {
-  const { inventory, updateQty, deleteItem, sendToSheet, lang, config, sendAllToSheet } = useInventory();
+  const { inventory, updateQty, deleteItem, sendToSheet, lang, config, sendAllToSheet, clearInventory } = useInventory();
   const t = translations[lang];
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -179,7 +179,7 @@ export function InventoryPage() {
             ))}
 
             {/* Send All to STOCK Button */}
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
               <button 
                 onClick={() => {
                   soundService.playClick();
@@ -192,6 +192,20 @@ export function InventoryPage() {
               >
                 <Send size={20} />
                 {lang === 'ar' ? "إرسال الكل إلى STOCK" : "Send All to STOCK"}
+              </button>
+
+              <button 
+                onClick={() => {
+                  soundService.playClick();
+                  showConfirm(
+                    lang === 'ar' ? 'هل أنت متأكد من مسح كافة أصناف الجرد؟' : 'Are you sure you want to clear all inventory items?',
+                    clearInventory
+                  );
+                }}
+                className="w-full py-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-2xl font-black border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <Eraser size={20} />
+                {lang === 'ar' ? "حذف كافة الجرد" : "Delete All Inventory"}
               </button>
             </div>
           </>
