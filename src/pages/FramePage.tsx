@@ -20,8 +20,8 @@ export function FramePage() {
   const [brand, setBrand] = useState(config.brands[0] || "");
   const [color, setColor] = useState(config.colors[0] || "");
   const [factoryCode, setFactoryCode] = useState("");
-  const [cost, setCost] = useState("");
-  const [sell, setSell] = useState("");
+  const [cost, setCost] = useState(config.defaultFrameCost > 0 ? config.defaultFrameCost.toString() : "");
+  const [sell, setSell] = useState(config.defaultFrameSell > 0 ? config.defaultFrameSell.toString() : "");
   const [qty, setQty] = useState(1);
   const [sku, setSku] = useState("");
 
@@ -42,8 +42,8 @@ export function FramePage() {
       sell: sell || 0
     });
     setQty(1);
-    setCost("");
-    setSell("");
+    setCost(config.defaultFrameCost > 0 ? config.defaultFrameCost.toString() : "");
+    setSell(config.defaultFrameSell > 0 ? config.defaultFrameSell.toString() : "");
     setFactoryCode("");
   };
 

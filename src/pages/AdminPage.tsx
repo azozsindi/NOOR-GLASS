@@ -18,6 +18,16 @@ export function AdminPage() {
   const { inventory, config, setConfig, lang, setLang, theme, setTheme, clearInventory, clearAuditLog, sendAllToSheet, bulkAddItems } = useInventory();
   const t = translations[lang];
 
+  const [confirmModal, setConfirmModal] = React.useState<{
+    isOpen: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, message: '', onConfirm: () => {} });
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmModal({ isOpen: true, message, onConfirm });
+  };
+
   const updateLensRange = (max: number, min: number) => {
     setConfig(prev => ({ ...prev, lensMax: max, lensMin: min }));
   };
@@ -67,6 +77,151 @@ export function AdminPage() {
     }));
   };
 
+  const [selectedImportType, setSelectedImportType] = React.useState(config.lensTypes[0]?.value || 'BCG');
+
+  const parsePower = (raw: string): number => {
+    const clean = raw.trim();
+    if (clean === '') return 0;
+    const val = parseFloat(clean);
+    return isNaN(val) ? 0 : val;
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        
+        const allNewItems: Omit<InventoryItem, 'id' | 'date'>[] = [];
+        let totalSheetsProcessed = 0;
+
+        wb.SheetNames.forEach(wsname => {
+          const ws = wb.Sheets[wsname];
+          const sheetData = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+          
+          if (sheetData.length < 2) return;
+
+          // Try to detect lens type from sheet name with better matching
+          let sheetType = selectedImportType;
+          const normalize = (s: string) => s.replace(/\s+/g, '').toUpperCase();
+          const normalizedWsName = normalize(wsname);
+          
+          const matchedType = config.lensTypes.find(lt => 
+            normalizedWsName.includes(normalize(lt.value)) || 
+            normalizedWsName.includes(normalize(lt.labelAr)) || 
+            normalizedWsName.includes(normalize(lt.labelEn))
+          );
+          if (matchedType) sheetType = matchedType.value;
+
+          // Find CYL headers row
+          let cylRowIndex = -1;
+          for (let i = 0; i < Math.min(20, sheetData.length); i++) {
+            const row = sheetData[i];
+            if (!row) continue;
+            const numericValues = row.map(v => parseFloat(String(v))).filter(v => !isNaN(v));
+            if (numericValues.length > 5) {
+              cylRowIndex = i;
+              break;
+            }
+          }
+
+          if (cylRowIndex === -1) return;
+          totalSheetsProcessed++;
+
+          const cylRow = sheetData[cylRowIndex];
+          
+          // Detect SPH column: usually first or last
+          let sphColIndex = 0;
+          const lastColIdx = cylRow.length - 1;
+          
+          // Check if last column looks like SPH (sequential values 0, 0.25, 0.50...)
+          const sampleRows = sheetData.slice(cylRowIndex + 1, cylRowIndex + 6);
+          const firstColSample = sampleRows.map(r => parseFloat(String(r[0])));
+          const lastColSample = sampleRows.map(r => parseFloat(String(r[lastColIdx])));
+          
+          const isSequential = (arr: number[]) => {
+            if (arr.length < 2) return false;
+            const diffs = arr.slice(1).map((v, idx) => Math.abs(v - arr[idx]));
+            return diffs.every(d => d === 0.25 || d === 0);
+          };
+
+          if (isSequential(lastColSample) && !isSequential(firstColSample)) {
+            sphColIndex = lastColIdx;
+          }
+
+          for (let i = cylRowIndex + 1; i < sheetData.length; i++) {
+            const row = sheetData[i];
+            if (!row || row.length === 0) continue;
+            
+            const sphRaw = String(row[sphColIndex] || '').trim();
+            const sphVal = parsePower(sphRaw);
+
+            for (let j = 0; j < row.length; j++) {
+              if (j === sphColIndex) continue; // Skip the SPH column itself
+              
+              const qty = parseInt(String(row[j] || '0'));
+              if (isNaN(qty) || qty <= 0) continue;
+
+              const cylRaw = String(cylRow[j] || '').trim();
+              const cylVal = parsePower(cylRaw);
+
+              // Standardize values for SKU
+              const sphSign = sphVal < 0 ? "M" : "P";
+              const sphClean = Math.abs(sphVal).toFixed(2).replace(/[.]/g, '').padStart(4, '0');
+              const cylClean = Math.abs(cylVal).toFixed(2).replace(/[.]/g, '').padStart(4, '0');
+              
+              const sku = `${sheetType}${sphSign} ${sphClean} ${cylClean}`;
+
+              allNewItems.push({
+                sku,
+                qty,
+                type: 'lens',
+                cost: 0,
+                sell: 0
+              });
+            }
+          }
+        });
+
+        if (allNewItems.length > 0) {
+          bulkAddItems(allNewItems);
+          toast.success(`${t.import_success} (${allNewItems.length} items from ${totalSheetsProcessed} sheets)`);
+        } else {
+          toast.error(t.import_error + " - No valid data found in " + wb.SheetNames.length + " sheets");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(t.import_error);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const downloadTemplate = () => {
+    const headers = ["SPH / CYL", "0.00", "-0.25", "-0.50", "-0.75", "-1.00", "-1.25", "-1.50", "-1.75", "-2.00"];
+    const rows = [
+      ["0.00", 10, 5, 0, 2, 0, 0, 0, 0, 0],
+      ["-0.25", 0, 8, 12, 0, 5, 0, 0, 0, 0],
+      ["-0.50", 4, 0, 0, 15, 0, 3, 0, 0, 0],
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["LENS INVENTORY TEMPLATE"],
+      ["Sheet name should be lens code (e.g. BCG)"],
+      headers,
+      ...rows
+    ]);
+    
+    XLSX.utils.book_append_sheet(wb, ws, "BCG");
+    XLSX.writeFile(wb, "Lens_Inventory_Template.xlsx");
+    toast.success("Template downloaded");
+  };
+
   const handleBulkImport = () => {
     const textarea = document.getElementById('bulk-import-area') as HTMLTextAreaElement;
     const data = textarea.value.trim();
@@ -76,34 +231,62 @@ export function AdminPage() {
       const lines = data.split('\n').filter(l => l.trim().length > 0);
       if (lines.length < 3) throw new Error("Invalid format");
 
-      // Row 3 (index 2) is CYL headers
-      const cylHeaders = lines[2].split(';').map(h => h.trim()).filter(h => h !== '');
-      // Remove the first element if it's '0' or empty (it's the SPH column header)
-      if (cylHeaders[0] === '0' || cylHeaders[0] === '') cylHeaders.shift();
+      // Find CYL headers row
+      let cylRowIndex = -1;
+      for (let i = 0; i < Math.min(10, lines.length); i++) {
+        const parts = lines[i].split(';').map(p => p.trim());
+        const numericCount = parts.filter(p => !isNaN(parseFloat(p)) && p !== '').length;
+        if (numericCount > 5) {
+          cylRowIndex = i;
+          break;
+        }
+      }
+
+      if (cylRowIndex === -1) throw new Error("Could not find headers");
+
+      const cylRow = lines[cylRowIndex].split(';').map(p => p.trim());
+      
+      // Detect SPH column
+      let sphColIndex = 0;
+      const lastColIdx = cylRow.length - 1;
+      const sampleRows = lines.slice(cylRowIndex + 1, cylRowIndex + 4).map(l => l.split(';'));
+      
+      const firstColSample = sampleRows.map(r => parseFloat(r[0]));
+      const lastColSample = sampleRows.map(r => parseFloat(r[lastColIdx]));
+      
+      const isSequential = (arr: number[]) => {
+        if (arr.length < 2) return false;
+        const diffs = arr.slice(1).map((v, idx) => Math.abs(v - arr[idx]));
+        return diffs.every(d => d === 0.25 || d === 0);
+      };
+
+      if (isSequential(lastColSample) && !isSequential(firstColSample)) {
+        sphColIndex = lastColIdx;
+      }
 
       const newItems: Omit<InventoryItem, 'id' | 'date'>[] = [];
 
-      // Rows from index 3 are SPH and quantities
-      for (let i = 3; i < lines.length; i++) {
+      for (let i = cylRowIndex + 1; i < lines.length; i++) {
         const parts = lines[i].split(';').map(p => p.trim());
-        const sph = parts[0];
-        if (!sph || sph === '') continue;
+        const sphRaw = parts[sphColIndex];
+        if (sphRaw === undefined) continue;
+        const sphVal = parsePower(sphRaw);
 
-        for (let j = 1; j < parts.length; j++) {
+        for (let j = 0; j < parts.length; j++) {
+          if (j === sphColIndex) continue;
+          
           const qty = parseInt(parts[j]);
           if (isNaN(qty) || qty <= 0) continue;
 
-          const cyl = cylHeaders[j - 1];
-          if (!cyl) continue;
+          const cylRaw = cylRow[j];
+          if (cylRaw === undefined) continue;
+          const cylVal = parsePower(cylRaw);
 
-          // Generate SKU using the same logic as LensPage
-          const sphClean = sph.replace(/[+\-.]/g, '').padStart(4, '0');
-          const cylClean = cyl.replace(/[+\-.]/g, '').padStart(4, '0');
-          const sphSign = sph.includes('-') ? "M" : "P";
+          const sphSign = sphVal < 0 ? "M" : "P";
+          const sphClean = Math.abs(sphVal).toFixed(2).replace(/[.]/g, '').padStart(4, '0');
+          const cylClean = Math.abs(cylVal).toFixed(2).replace(/[.]/g, '').padStart(4, '0');
           
-          // Default to BCG (Blue Cut Green) or first available type
-          const baseCode = config.lensTypes[0]?.value || "BCG";
-          const sku = `${baseCode}${sphSign} ${sphClean} ${cylClean}`;
+          const sku = `${selectedImportType}${sphSign} ${sphClean} ${cylClean}`;
 
           newItems.push({
             sku,
@@ -118,6 +301,7 @@ export function AdminPage() {
       if (newItems.length > 0) {
         bulkAddItems(newItems);
         textarea.value = '';
+        toast.success(`${t.import_success} (${newItems.length} items)`);
       } else {
         toast.error(t.import_error);
       }
@@ -243,39 +427,68 @@ export function AdminPage() {
     toast.success("Excel file downloaded");
   };
 
+  const exportBackup = () => {
+    soundService.playClick();
+    const backupData = {
+      inventory,
+      config,
+      timestamp: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `NoorGlass_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(lang === 'ar' ? "تم تصدير النسخة الاحتياطية" : "Backup exported successfully");
+  };
+
+  const importBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = JSON.parse(evt.target?.result as string);
+        if (data.inventory && data.config) {
+          // Merge or overwrite? Let's overwrite for a clean restore
+          localStorage.setItem("noor_glass_v2026_final", JSON.stringify(data.inventory));
+          localStorage.setItem("noor_config", JSON.stringify(data.config));
+          toast.success(lang === 'ar' ? "تمت استعادة البيانات بنجاح! سيتم إعادة تحميل التطبيق." : "Data restored successfully! App will reload.");
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          toast.error(t.import_error);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(t.import_error);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const resetApplication = () => {
+    soundService.playClick();
+    localStorage.clear();
+    toast.success(lang === 'ar' ? "تم مسح كافة البيانات. سيتم إعادة تشغيل التطبيق." : "All data cleared. App will restart.");
+    setTimeout(() => window.location.reload(), 2000);
+  };
+
   const loadSampleData = () => {
-    const sample = `;??????? ?????? - -;;;;;;;;;;;;;;;;;;;;;;;;;
+    const sample = `بلوكت ازرق - -;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
-0;0.00;-0.25;-0.50;-0.75;-1.00;-1.25;-1.50;-1.75;-2.00;-2.25;-2.50;-2.75;-3.00;-3.25;-3.50;-3.75;-4.00;-4.25;-4.50;-4.75;-5.00;-5.25;-5.50;-5.75;-6.00;
-0.00;0;39;0;0;0;8;19;19;0;33;40;41;35;8;35;0;0;0;0;0;0;0;0;0;0;
--0.25;19;16;6;18;0;0;0;5;11;0;39;0;0;8;8;0;0;0;0;0;0;0;0;0;0;
--0.50;1;45;0;12;0;6;4;13;6;20;15;37;45;0;8;0;0;0;0;0;0;0;0;0;0;
--0.75;0;9;0;0;0;0;17;8;5;18;10;49;36;10;4;0;0;0;0;0;0;0;0;0;0;
--1.00;2;28;0;0;0;17;19;15;10;25;37;8;0;6;1;0;30;0;0;0;0;0;0;0;0;
--1.25;20;11;0;0;0;9;9;6;0;40;40;10;0;20;10;0;30;0;0;0;0;0;0;0;0;
--1.50;0;4;3;0;0;17;9;3;9;20;17;0;20;20;9;0;30;0;0;0;0;0;0;0;0;
--1.75;24;8;0;0;13;0;14;0;14;0;38;20;15;20;0;0;30;0;0;0;0;0;0;0;0;
--2.00;25;14;0;0;15;16;14;0;12;0;40;20;20;19;2;0;0;0;0;0;0;0;0;0;0;
--2.25;34;19;6;0;20;20;9;0;0;20;25;9;48;10;10;0;0;0;0;0;0;0;0;0;0;
--2.50;0;8;4;0;0;15;11;0;0;0;25;0;60;0;17;0;0;0;0;0;0;0;0;0;0;
--2.75;14;6;5;0;17;9;18;15;0;18;26;9;27;10;7;0;0;0;0;0;0;0;0;0;0;
--3.00;5;17;4;0;16;22;0;7;7;18;0;40;19;24;39;0;0;0;0;0;0;0;0;0;0;
--3.25;9;17;0;0;0;15;19;4;7;13;0;20;15;0;7;0;28;0;0;0;0;0;0;0;0;
--3.50;17;19;1;0;0;19;16;17;0;11;18;0;30;9;10;0;8;0;0;0;0;0;0;0;0;
--3.75;18;23;0;0;0;19;0;21;0;14;30;0;30;0;10;0;20;0;0;0;0;0;0;0;0;
--4.00;8;27;5;0;5;15;0;5;11;30;30;9;0;9;30;0;10;0;0;0;0;0;0;0;0;
--4.25;19;20;3;0;0;8;1;0;7;13;10;10;0;3;0;0;8;0;0;0;0;0;0;0;0;
--4.50;18;10;8;0;18;11;0;10;10;10;0;20;0;4;0;0;0;0;0;0;0;0;0;0;0;
--4.75;12;10;8;0;19;11;7;10;10;10;0;0;0;7;0;0;10;0;0;0;0;0;0;0;0;
--5.00;7;16;6;0;11;3;6;0;6;20;0;0;0;5;0;0;6;0;0;0;0;0;0;0;0;
--5.25;10;0;10;0;11;0;9;10;4;8;0;0;0;7;0;0;9;0;0;0;0;0;0;0;0;
--5.50;10;10;10;0;7;0;0;12;5;7;0;0;0;7;0;0;20;0;0;0;0;0;0;0;0;
--5.75;0;9;0;0;9;0;0;0;9;12;0;0;0;0;0;0;10;0;0;0;0;0;0;0;0;
--6.00;0;10;0;0;0;0;4;0;10;20;20;0;0;0;0;0;0;0;0;0;0;0;0;0;0;`;
+-6.00;-5.75;-5.50;-5.25;-5.00;-4.75;-4.50;-4.25;-4.00;-3.75;-3.50;-3.25;-3.00;-2.75;-2.50;2.25;-2.00;-1.75;-1.50;-1.25;-1.00;-0.75;-0.50;-0.25;0.00;0.00;
+5;5;15;14;20;18;1;12;8;7;25;23;8;5;4;6;0;0;0;0;0.00;
+3;5;3;5;5;3;3;4;7;7;10;6;2;0;0;0;9;0.25;
+5;5;2;5;4;3;5;3;4;18;11;3;0;3;0;13;0;0.50;
+5;5;5;5;3;2;1;3;5;8;10;2;4;5;1;15;0;0.75;
+4;5;5;5;2;4;5;3;3;8;12;7;17;11;0;4;0;1.00;`;
     const textarea = document.getElementById('bulk-import-area') as HTMLTextAreaElement;
     if (textarea) {
       textarea.value = sample;
-      toast.info(lang === 'ar' ? "تم تجهيز البيانات، اضغط 'بدء الاستيراد'" : "Data ready, click 'Import Data'");
+      toast.info(lang === 'ar' ? "تم تجهيز البيانات (بلوكت أزرق)، اضغط 'بدء الاستيراد'" : "Data ready (Blue Cut Blue), click 'Import Data'");
     }
   };
 
@@ -347,14 +560,92 @@ export function AdminPage() {
 
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
         <h2 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 border-s-4 border-blue-800 ps-3">{t.admin_system_settings}</h2>
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-slate-900 dark:text-white">{t.lbl_enable_sound}</span>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-slate-900 dark:text-white">{t.lbl_enable_sound}</span>
+            <button 
+              onClick={() => setConfig(prev => ({ ...prev, enableSound: !prev.enableSound }))}
+              className={`w-12 h-6 rounded-full transition-colors relative ${config.enableSound ? 'bg-blue-800' : 'bg-slate-300'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.enableSound ? 'right-1' : 'right-7'}`} />
+            </button>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-slate-900 dark:text-white">{t.lbl_enable_anim}</span>
+            <button 
+              onClick={() => setConfig(prev => ({ ...prev, enableAnimations: !prev.enableAnimations }))}
+              className={`w-12 h-6 rounded-full transition-colors relative ${config.enableAnimations ? 'bg-blue-800' : 'bg-slate-300'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.enableAnimations ? 'right-1' : 'right-7'}`} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <h2 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 border-s-4 border-blue-800 ps-3">{t.admin_pricing}</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-500 uppercase">{t.lbl_def_lens_cost}</label>
+            <input 
+              type="number"
+              value={config.defaultLensCost}
+              onChange={(e) => setConfig(prev => ({ ...prev, defaultLensCost: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-slate-900 dark:text-white"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-500 uppercase">{t.lbl_def_lens_sell}</label>
+            <input 
+              type="number"
+              value={config.defaultLensSell}
+              onChange={(e) => setConfig(prev => ({ ...prev, defaultLensSell: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-slate-900 dark:text-white"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-500 uppercase">{t.lbl_def_frame_cost}</label>
+            <input 
+              type="number"
+              value={config.defaultFrameCost}
+              onChange={(e) => setConfig(prev => ({ ...prev, defaultFrameCost: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-slate-900 dark:text-white"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-500 uppercase">{t.lbl_def_frame_sell}</label>
+            <input 
+              type="number"
+              value={config.defaultFrameSell}
+              onChange={(e) => setConfig(prev => ({ ...prev, defaultFrameSell: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-slate-900 dark:text-white"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <h2 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 border-s-4 border-blue-800 ps-3">{t.admin_backup}</h2>
+        <div className="grid grid-cols-1 gap-3">
           <button 
-            onClick={() => setConfig(prev => ({ ...prev, enableSound: !prev.enableSound }))}
-            className={`w-12 h-6 rounded-full transition-colors relative ${config.enableSound ? 'bg-blue-800' : 'bg-slate-300'}`}
+            onClick={exportBackup}
+            className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
           >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.enableSound ? 'right-1' : 'right-7'}`} />
+            <FileSpreadsheet size={20} />
+            {t.btn_export_json}
           </button>
+          <div className="relative">
+            <input 
+              type="file" 
+              accept=".json"
+              onChange={importBackup}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+            <button className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 pointer-events-none">
+              <Upload size={20} />
+              {t.btn_import_json}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -561,27 +852,86 @@ export function AdminPage() {
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
         <h2 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 border-s-4 border-blue-800 ps-3">{t.admin_bulk_import}</h2>
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <label className="text-xs font-bold text-slate-500">{t.admin_bulk_import}</label>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-bold text-slate-500">{t.admin_bulk_import}</label>
+              <div className="flex gap-2">
+                <button 
+                  onClick={downloadTemplate}
+                  className="text-[10px] px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 rounded border border-emerald-200 text-emerald-700 font-bold"
+                >
+                  {t.download_template}
+                </button>
+                <button 
+                  onClick={loadSampleData}
+                  className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 text-blue-800 font-bold"
+                >
+                  {t.btn_load_sample}
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                {t.import_lens_type}
+              </label>
+              <p className="text-[9px] text-slate-400 italic">
+                {t.import_excel_hint}
+              </p>
+              <select 
+                value={selectedImportType}
+                onChange={(e) => setSelectedImportType(e.target.value)}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-sm font-bold"
+              >
+                {config.lensTypes.map(lt => (
+                  <option key={lt.value} value={lt.value}>
+                    {lt.value} - {lang === 'ar' ? lt.labelAr : lt.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative">
+              <input 
+                type="file" 
+                accept=".xlsx, .xls"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="excel-upload"
+              />
+              <label 
+                htmlFor="excel-upload"
+                className="w-full py-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
+              >
+                <FileSpreadsheet size={24} />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  {t.import_excel}
+                </span>
+              </label>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase">
+                <span className="bg-white dark:bg-slate-900 px-2 text-slate-400 font-bold">{t.import_or_paste}</span>
+              </div>
+            </div>
+
+            <textarea 
+              id="bulk-import-area"
+              placeholder={t.import_placeholder}
+              className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-xs font-mono"
+            />
             <button 
-              onClick={loadSampleData}
-              className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 text-blue-800 font-bold"
+              onClick={handleBulkImport}
+              className="w-full py-3 bg-blue-800 text-white rounded-xl font-bold flex items-center justify-center gap-2"
             >
-              {t.btn_load_sample}
+              <Upload size={18} />
+              {t.btn_import}
             </button>
           </div>
-          <textarea 
-            id="bulk-import-area"
-            placeholder={t.import_placeholder}
-            className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 text-xs font-mono"
-          />
-          <button 
-            onClick={handleBulkImport}
-            className="w-full py-3 bg-blue-800 text-white rounded-xl font-bold flex items-center justify-center gap-2"
-          >
-            <Upload size={18} />
-            {t.btn_import}
-          </button>
         </div>
       </div>
 
@@ -609,7 +959,7 @@ export function AdminPage() {
         <h2 className="text-lg font-bold text-red-800 dark:text-red-400 mb-4 border-s-4 border-red-800 ps-3">{t.admin_danger}</h2>
         <div className="space-y-3">
           <button 
-            onClick={sendAllToSheet}
+            onClick={() => showConfirm(lang === 'ar' ? 'هل أنت متأكد من إرسال وحذف كافة السجلات؟' : 'Are you sure you want to send and delete all records?', sendAllToSheet)}
             disabled={inventory.length === 0}
             className={`w-full py-4 text-white rounded-xl font-black shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 ${inventory.length === 0 ? 'bg-slate-400 opacity-50 cursor-not-allowed' : 'bg-emerald-600'}`}
           >
@@ -617,19 +967,56 @@ export function AdminPage() {
             {t.btn_send_all}
           </button>
           <button 
-            onClick={clearInventory}
+            onClick={() => showConfirm(lang === 'ar' ? 'هل أنت متأكد من مسح كافة السجلات؟' : 'Are you sure you want to clear all records?', clearInventory)}
             className="w-full py-4 bg-white dark:bg-slate-900 text-red-600 rounded-xl font-black border border-red-200 dark:border-red-900/50 shadow-sm active:scale-95 transition-transform"
           >
             {t.btn_clear_inv}
           </button>
           <button 
-            onClick={clearAuditLog}
+            onClick={() => showConfirm(lang === 'ar' ? 'هل أنت متأكد من مسح سجل العمليات؟' : 'Are you sure you want to clear the audit log?', clearAuditLog)}
             className="w-full py-4 bg-white dark:bg-slate-900 text-red-600 rounded-xl font-black border border-red-200 dark:border-red-900/50 shadow-sm active:scale-95 transition-transform"
           >
             {t.btn_clear_logs}
           </button>
+          <button 
+            onClick={() => showConfirm(t.reset_confirm, resetApplication)}
+            className="w-full py-4 bg-red-600 text-white rounded-2xl font-black shadow-lg shadow-red-600/20 active:scale-95 transition-transform"
+          >
+            {t.btn_reset_app}
+          </button>
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 text-center">
+              {lang === 'ar' ? 'تأكيد العملية' : 'Confirm Action'}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 text-center mb-8 font-bold leading-relaxed">
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black active:scale-95 transition-transform"
+              >
+                {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button 
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }}
+                className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black shadow-lg shadow-red-600/20 active:scale-95 transition-transform"
+              >
+                {lang === 'ar' ? 'تأكيد' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

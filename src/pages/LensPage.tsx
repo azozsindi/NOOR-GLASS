@@ -26,8 +26,8 @@ export function LensPage() {
   const [selectedType, setSelectedType] = useState(lensOptions[0] || { id: "BCG+", base: "BCG", sign: "+", label: "BCG (+) بلو كت أخضر" });
   const [sph, setSph] = useState("0.00");
   const [cyl, setCyl] = useState("0.00");
-  const [cost, setCost] = useState("");
-  const [sell, setSell] = useState("");
+  const [cost, setCost] = useState(config.defaultLensCost > 0 ? config.defaultLensCost.toString() : "");
+  const [sell, setSell] = useState(config.defaultLensSell > 0 ? config.defaultLensSell.toString() : "");
   const [qty, setQty] = useState(1);
   const [sku, setSku] = useState("");
 
@@ -59,8 +59,8 @@ export function LensPage() {
       sell: sell || 0
     });
     setQty(1);
-    setCost("");
-    setSell("");
+    setCost(config.defaultLensCost > 0 ? config.defaultLensCost.toString() : "");
+    setSell(config.defaultLensSell > 0 ? config.defaultLensSell.toString() : "");
   };
 
   const handlePrint = () => {

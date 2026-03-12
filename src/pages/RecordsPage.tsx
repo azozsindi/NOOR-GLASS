@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 import { useInventory } from '../useInventory';
 import { translations } from '../i18n';
 import * as XLSX from 'xlsx';
-import { Trash2, Send, FileSpreadsheet, Search as SearchIcon, Printer, Eraser } from 'lucide-react';
+import { Trash2, Send, FileSpreadsheet, Search as SearchIcon, Printer, Eraser, ChevronUp, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 import { soundService } from '../services/soundService';
 
@@ -15,8 +16,37 @@ export function RecordsPage() {
   const { inventory, updateQty, deleteItem, sendToSheet, lang, config, clearInventory, sendAllToSheet } = useInventory();
   const t = translations[lang];
 
+  const [confirmModal, setConfirmModal] = React.useState<{
+    isOpen: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, message: '', onConfirm: () => {} });
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmModal({ isOpen: true, message, onConfirm });
+  };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<'all' | 'lens' | 'frame'>('all');
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollButtons(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    soundService.playClick();
+  };
+
+  const scrollToBottom = () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    soundService.playClick();
+  };
 
   const filteredInventory = inventory.filter(item => {
     const matchesSearch = item.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -94,7 +124,19 @@ export function RecordsPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
+      {/* Pull to Refresh Visual Indicator */}
+      <div className="absolute -top-12 left-0 right-0 flex justify-center opacity-20 pointer-events-none">
+        <motion.div 
+          animate={{ y: [0, 10, 0] }} 
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="flex flex-col items-center gap-1"
+        >
+          <ChevronDown size={20} />
+          <span className="text-[10px] font-bold uppercase tracking-widest">{lang === 'ar' ? 'اسحب للتحديث' : 'Pull to Refresh'}</span>
+        </motion.div>
+      </div>
+
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
         <h2 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-4 border-s-4 border-blue-800 ps-3">{t.inventory}</h2>
         
@@ -144,7 +186,11 @@ export function RecordsPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                        <span>{item.type === 'lens' ? t.filter_lens : t.filter_frame}</span>
+                        <span>
+                          {item.type === 'lens' 
+                            ? (config.lensTypes.find(lt => item.sku.startsWith(lt.value))?.[lang === 'ar' ? 'labelAr' : 'labelEn'] || t.filter_lens)
+                            : t.filter_frame}
+                        </span>
                         <span>•</span>
                         <span className="text-emerald-700 dark:text-emerald-400">Sell: {item.sell} {config.currency}</span>
                       </div>
@@ -211,7 +257,7 @@ export function RecordsPage() {
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
         <div className="flex flex-col gap-3">
           <button 
-            onClick={sendAllToSheet}
+            onClick={() => showConfirm(lang === 'ar' ? 'هل أنت متأكد من إرسال وحذف كافة السجلات؟' : 'Are you sure you want to send and delete all records?', sendAllToSheet)}
             disabled={inventory.length === 0}
             className={`w-full py-4 text-white rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform ${inventory.length === 0 ? 'bg-slate-400 opacity-50 cursor-not-allowed' : 'bg-emerald-600'}`}
           >
@@ -227,7 +273,7 @@ export function RecordsPage() {
               {t.export}
             </button>
             <button 
-              onClick={clearInventory}
+              onClick={() => showConfirm(lang === 'ar' ? 'هل أنت متأكد من مسح كافة السجلات؟' : 'Are you sure you want to clear all records?', clearInventory)}
               className="flex-1 py-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-black flex items-center justify-center gap-2 border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform"
             >
               <Eraser size={20} />
@@ -236,6 +282,63 @@ export function RecordsPage() {
           </div>
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 text-center">
+              {lang === 'ar' ? 'تأكيد العملية' : 'Confirm Action'}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 text-center mb-8 font-bold leading-relaxed">
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl font-black active:scale-95 transition-transform"
+              >
+                {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button 
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                }}
+                className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black shadow-lg shadow-red-600/20 active:scale-95 transition-transform"
+              >
+                {lang === 'ar' ? 'تأكيد' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Scroll Buttons */}
+      <AnimatePresence>
+        {showScrollButtons && (
+          <div className="fixed right-6 bottom-28 z-40 flex flex-col gap-3">
+            <motion.button
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: 20 }}
+              onClick={scrollToTop}
+              className="w-12 h-12 bg-blue-900 text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform border-2 border-white/20"
+            >
+              <ChevronUp size={24} />
+            </motion.button>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: 20 }}
+              onClick={scrollToBottom}
+              className="w-12 h-12 bg-slate-800 text-white rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform border-2 border-white/20"
+            >
+              <ChevronDown size={24} />
+            </motion.button>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

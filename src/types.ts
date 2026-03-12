@@ -45,6 +45,11 @@ export interface AppConfig {
   enableSound: boolean;
   barcodeDisplayValue: boolean;
   lensTypes: LensTypeConfig[];
+  defaultLensCost: number;
+  defaultLensSell: number;
+  defaultFrameCost: number;
+  defaultFrameSell: number;
+  enableAnimations: boolean;
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -69,6 +74,13 @@ export const DEFAULT_CONFIG: AppConfig = {
     { value: "MCC", labelAr: "عاكس", labelEn: "Anti-Reflection" },
     { value: "UCC", labelAr: "عدسة بيضاء", labelEn: "White Lens" },
   ],
+  defaultLensCost: 0,
+  defaultLensSell: 0,
+  defaultFrameCost: 0,
+  defaultFrameSell: 0,
+  enableAnimations: true,
 };
 
-export const SHEET_URL = "https://script.google.com/macros/s/AKfycbwMhbtLbSPiWEipTi4fy3w5upZG-W_Ix6DFtR1oKL74uwjfSWglB1tg7qiBT_5NI1B_cA/exec";
+export const SHEET_URL = "https://script.google.com/macros/s/AKfycbxzhlof0PXczSN2pwNoJ_SVsY5CpO1gMIe3r-lykS-u8ytMcHkndzwWkKmKONU0lHup/exec";
+export const STOCK_SHEET_URL = ""; // User can fill this in .env or here
+export const STOCK_SHEET_NAME = "STOCK";

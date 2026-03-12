@@ -51,6 +51,11 @@ export const translations = {
     admin_bulk_import: "استيراد بيانات الجرد (CSV)",
     import_placeholder: "الصق البيانات هنا...",
     btn_import: "بدء الاستيراد",
+    import_excel: "إرفاق ملف إكسيل (.xlsx)",
+    import_or_paste: "أو الصق البيانات هنا",
+    import_lens_type: "نوع العدسة للاستيراد",
+    import_excel_hint: "* سيتم استخدام هذا النوع إذا لم يتطابق اسم ورقة الإكسيل مع أي كود عدسة.",
+    download_template: "تحميل النموذج",
     import_success: "تم استيراد البيانات بنجاح!",
     import_error: "خطأ في تنسيق البيانات",
     btn_load_sample: "تجهيز عينة البيانات",
@@ -70,15 +75,27 @@ export const translations = {
     lbl_lens_ar: "الاسم بالعربي:",
     lbl_lens_en: "الاسم بالإنجليزي:",
     range_updated: "تم تحديث نطاق العدسات!", update_date_lbl: "تاريخ التحديث:",
+    admin_backup: "💾 النسخ الاحتياطي والاستعادة",
+    btn_export_json: "تصدير نسخة احتياطية (JSON)",
+    btn_import_json: "استيراد نسخة احتياطية (JSON)",
+    admin_pricing: "💰 الأسعار الافتراضية",
+    lbl_def_lens_cost: "تكلفة العدسة الافتراضية:",
+    lbl_def_lens_sell: "بيع العدسة الافتراضية:",
+    lbl_def_frame_cost: "تكلفة الفريم الافتراضية:",
+    lbl_def_frame_sell: "بيع الفريم الافتراضية:",
+    lbl_enable_anim: "تفعيل الحركات التفاعلية:",
+    btn_reset_app: "إعادة ضبط المصنع (مسح شامل)",
+    reset_confirm: "هل أنت متأكد؟ سيتم حذف كافة البيانات والإعدادات والسجلات نهائياً ولا يمكن التراجع!",
     updates_html: `
-        <p style="margin-top:0; font-weight:bold; color:var(--primary);">أهلاً بك، إليك أبرز التحديثات الأخيرة (فبراير 2026):</p>
+        <p style="margin-top:0; font-weight:bold; color:var(--primary);">أهلاً بك، إليك أبرز التحديثات الأخيرة (مارس 2026):</p>
         <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
-            <li style="margin-bottom:12px;"><strong>1. نظام التقارير المتقدم:</strong><br>إضافة صفحة "التقارير" التي تعرض إحصائيات المخزون، توزيع الماركات، وحساب الأرباح المتوقعة بدقة.</li>
-            <li style="margin-bottom:12px;"><strong>2. نظام الإشعارات الفورية:</strong><br>تفعيل رسائل تأكيد (Toasts) تظهر عند الحفظ، الإرسال، أو الحذف لضمان تفاعل النظام مع المستخدم.</li>
-            <li style="margin-bottom:12px;"><strong>3. تبسيط ملصقات الطباعة:</strong><br>تحسين شكل الملصق المطبوع ليركز على الباركود والكود فقط بشكل أكبر وأوضح للمسح.</li>
-            <li style="margin-bottom:12px;"><strong>4. ميزة الإرسال الجماعي:</strong><br>إضافة زر "إرسال وحذف الكل" في صفحة السجلات والإعدادات لترحيل كافة البيانات بضغطة واحدة.</li>
-            <li style="margin-bottom:12px;"><strong>5. تتبع الزيارات:</strong><br>إصلاح ميزة "آخر زيارة" لتعرض وقت دخولك السابق بدقة عند فتح التطبيق.</li>
-            <li style="margin-bottom:12px;"><strong>6. تحسينات الواجهة:</strong><br>إزالة أيقونات الطباعة المكررة وتحسين تباين الألوان في الوضعين الليلي والنهاري.</li>
+            <li style="margin-bottom:12px;"><strong>1. أدوات التنقل السريع:</strong><br>إضافة أزرار عائمة ذكية (Scroll to Top/Bottom) تظهر تلقائياً عند التمرير لتسهيل التنقل في القوائم الطويلة.</li>
+            <li style="margin-bottom:12px;"><strong>2. واجهة جوال متطورة:</strong><br>تحويل شريط التنقل السفلي إلى شريط قابل للسحب أفقياً مع حركات تفاعلية (Spring Animations) لتناسب كافة أحجام الشاشات.</li>
+            <li style="margin-bottom:12px;"><strong>2. منطق المقاسات الذكي:</strong><br>تبسيط إدخال مقاسات العدسات بحيث يتم اعتبار أي رقم بدون إشارة كقيمة موجبة (+) تلقائياً لتسريع العمل.</li>
+            <li style="margin-bottom:12px;"><strong>3. نظام الجرد المنفصل (STOCK):</strong><br>تخصيص صفحة الجرد لترسل البيانات إلى ورقة عمل منفصلة باسم "STOCK" في جوجل شيت لتنظيم عمليات الجرد السنوية.</li>
+            <li style="margin-bottom:12px;"><strong>4. نوافذ تأكيد مخصصة:</strong><br>استبدال تنبيهات المتصفح المزعجة بنوافذ تأكيد (Modals) عصرية مدمجة في واجهة التطبيق.</li>
+            <li style="margin-bottom:12px;"><strong>5. إعدادات موسعة:</strong><br>إضافة خيارات النسخ الاحتياطي، استعادة البيانات، وتعيين الأسعار الافتراضية لتسهيل الإدخال السريع.</li>
+            <li style="margin-bottom:12px;"><strong>6. تحسينات الأداء:</strong><br>تحسين سرعة استجابة الواجهة ودعم المناطق الآمنة (Safe Areas) للهواتف الحديثة.</li>
         </ul>`
   },
   en: {
@@ -128,6 +145,11 @@ export const translations = {
     admin_bulk_import: "Bulk Import (CSV)",
     import_placeholder: "Paste CSV data here...",
     btn_import: "Import Data",
+    import_excel: "Attach Excel File (.xlsx)",
+    import_or_paste: "OR PASTE DATA HERE",
+    import_lens_type: "Lens Type for Import",
+    import_excel_hint: "* This type will be used if the Excel sheet name doesn't match any lens code.",
+    download_template: "Download Template",
     import_success: "Data imported successfully!",
     import_error: "Data format error",
     btn_load_sample: "Load Sample Data",
@@ -147,16 +169,27 @@ export const translations = {
     lbl_lens_ar: "Arabic Name:",
     lbl_lens_en: "English Name:",
     range_updated: "Lens Range Updated!", update_date_lbl: "Update Date:",
+    admin_backup: "💾 Backup & Restore",
+    btn_export_json: "Export Backup (JSON)",
+    btn_import_json: "Import Backup (JSON)",
+    admin_pricing: "💰 Default Pricing",
+    lbl_def_lens_cost: "Default Lens Cost:",
+    lbl_def_lens_sell: "Default Lens Sell:",
+    lbl_def_frame_cost: "Default Frame Cost:",
+    lbl_def_frame_sell: "Default Frame Sell:",
+    lbl_enable_anim: "Enable Animations:",
+    btn_reset_app: "Reset Application (Wipe All)",
+    reset_confirm: "Are you sure? This will delete ALL data, settings, and logs forever! This cannot be undone.",
     updates_html: `
-        <p style="margin-top:0; font-weight:bold; color:var(--primary);">Welcome, here are the latest updates (Feb 2026):</p>
+        <p style="margin-top:0; font-weight:bold; color:var(--primary);">Welcome, here are the latest updates (March 2026):</p>
         <ul style="padding-inline-start:15px; margin:0; list-style-type:none;">
-            <li style="margin-bottom:12px;"><strong>1. Smart SKU & Formatted Barcodes:</strong><br>SKU format updated to (BCGP 0200 0100) with clear spacing. Signs (+/-) are mapped to (P/M) for 100% barcode compatibility.</li>
-            <li style="margin-bottom:12px;"><strong>2. Unified Lens Interface:</strong><br>Merged lens type and sign into a single smart selection list with bilingual support (Arabic/English).</li>
-            <li style="margin-bottom:12px;"><strong>3. Advanced Shop Settings:</strong><br>Customize shop name, phone, and currency to appear on all reports and printed labels.</li>
-            <li style="margin-bottom:12px;"><strong>4. Lens Type Management:</strong><br>New settings section to add or remove custom lens types (Blue Cut, Photochromic, etc.) based on your needs.</li>
-            <li style="margin-bottom:12px;"><strong>5. Display & Contrast Fixes:</strong><br>Resolved text visibility issues in Light Mode with high-contrast colors for better readability.</li>
-            <li style="margin-bottom:12px;"><strong>6. System Controls:</strong><br>Added toggles for sound effects and barcode text display.</li>
-            <li style="margin-bottom:5px;"><strong>7. Professional Printing:</strong><br>Printed labels now include shop name, contact info, and preferred currency.</li>
+            <li style="margin-bottom:12px;"><strong>1. Quick Navigation Tools:</strong><br>Added smart floating buttons (Scroll to Top/Bottom) that appear automatically for long lists.</li>
+            <li style="margin-bottom:12px;"><strong>2. Advanced Mobile UI:</strong><br>Horizontal scrollable navigation bar with Spring Animations for a seamless mobile experience.</li>
+            <li style="margin-bottom:12px;"><strong>2. Smart Power Logic:</strong><br>Simplified lens power entry where numbers without signs are automatically treated as positive (+).</li>
+            <li style="margin-bottom:12px;"><strong>3. Dedicated STOCK Integration:</strong><br>Inventory page now sends data to a specific "STOCK" sheet for better audit organization.</li>
+            <li style="margin-bottom:12px;"><strong>4. Custom Confirmation Modals:</strong><br>Replaced browser alerts with modern, themed confirmation dialogs.</li>
+            <li style="margin-bottom:12px;"><strong>5. Expanded Settings:</strong><br>Added Backup/Restore options, default pricing, and advanced system controls.</li>
+            <li style="margin-bottom:12px;"><strong>6. Performance & Safe Areas:</strong><br>Optimized UI responsiveness and added support for modern smartphone safe area insets.</li>
         </ul>`
   }
 };

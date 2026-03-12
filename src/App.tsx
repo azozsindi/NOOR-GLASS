@@ -112,14 +112,14 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-md mx-auto p-4 pb-20">
+      <main className="max-w-md mx-auto p-4 pb-24 px-safe">
         <AnimatePresence mode="wait">
           <motion.div
             key={activePage}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {renderPage()}
           </motion.div>
@@ -127,31 +127,49 @@ export default function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-1 py-1 flex justify-around items-center safe-bottom z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activePage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => {
-                soundService.playClick();
-                setActivePage(item.id);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 min-w-[60px] h-14 rounded-2xl transition-all active:scale-90 ${
-                isActive 
-                  ? 'text-blue-900 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30' 
-                  : 'text-slate-500 dark:text-slate-400'
-              }`}
-            >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] font-black uppercase tracking-tighter ${isActive ? 'opacity-100' : 'opacity-80'}`}>
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+      <div className="fixed bottom-0 inset-x-0 z-50 pb-safe">
+        {/* Fade indicators */}
+        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-slate-950 to-transparent pointer-events-none z-10 opacity-80" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-slate-950 to-transparent pointer-events-none z-10 opacity-80" />
+        
+        <nav className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-slate-200/50 dark:border-slate-800/50 px-6 py-2 flex overflow-x-auto scrollbar-hide no-scrollbar items-center shadow-[0_-8px_30px_rgba(0,0,0,0.08)] gap-2 scroll-smooth">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activePage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  soundService.playClick();
+                  setActivePage(item.id);
+                }}
+                className={`flex flex-col items-center justify-center gap-1.5 min-w-[80px] h-16 rounded-2xl transition-all active:scale-95 relative shrink-0 ${
+                  isActive 
+                    ? 'text-blue-900 dark:text-blue-400' 
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {isActive && (
+                  <motion.div 
+                    layoutId="nav-bg"
+                    className="absolute inset-0 bg-blue-50/80 dark:bg-blue-900/20 rounded-2xl -z-10 border border-blue-100/50 dark:border-blue-800/30"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <motion.div
+                  animate={isActive ? { scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] } : {}}
+                  transition={{ duration: 0.4 }}
+                >
+                  <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                </motion.div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 }

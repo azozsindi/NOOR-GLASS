@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { InventoryItem, AppConfig, DEFAULT_CONFIG, SHEET_URL, AuditEntry } from './types';
+import { InventoryItem, AppConfig, DEFAULT_CONFIG, SHEET_URL, STOCK_SHEET_URL, STOCK_SHEET_NAME, AuditEntry } from './types';
 import { toast } from 'sonner';
 import { translations } from './i18n';
 
@@ -121,25 +121,27 @@ export function useInventory() {
     }));
   };
 
-  const sendToSheet = async (id: number) => {
+  const sendToSheet = async (id: number, targetSheet?: string) => {
     const item = inventory.find(i => i.id === id);
     if (!item) return false;
 
+    const url = (targetSheet === STOCK_SHEET_NAME && STOCK_SHEET_URL) ? STOCK_SHEET_URL : SHEET_URL;
+
     try {
-      await fetch(SHEET_URL, {
+      await fetch(url, {
         method: "POST",
         mode: 'no-cors',
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sku: item.sku,
           qty: item.qty,
           type: item.type,
           cost: item.cost || 0,
           sell: item.sell || 0,
-          date: item.date
+          date: item.date,
+          sheetName: targetSheet || "Main"
         })
       });
-      addAuditEntry('SEND_TO_SHEET', `Sent ${item.sku} to cloud`);
+      addAuditEntry('SEND_TO_SHEET', `Sent ${item.sku} to cloud (${targetSheet || "Main"})`);
       toast.success(translations[lang].saved_sent);
       deleteItem(id, true);
       return true;
@@ -150,39 +152,35 @@ export function useInventory() {
   };
 
   const clearInventory = () => {
-    if (window.confirm(lang === 'ar' ? 'هل أنت متأكد من مسح كافة السجلات؟' : 'Are you sure you want to clear all records?')) {
-      setInventory([]);
-      addAuditEntry('CLEAR_INVENTORY', 'Cleared all inventory records');
-    }
+    setInventory([]);
+    addAuditEntry('CLEAR_INVENTORY', 'Cleared all inventory records');
   };
 
   const clearAuditLog = () => {
-    if (window.confirm(lang === 'ar' ? 'هل أنت متأكد من مسح سجل العمليات؟' : 'Are you sure you want to clear the audit log?')) {
-      setConfig(prev => ({ ...prev, auditLog: [] }));
-    }
+    setConfig(prev => ({ ...prev, auditLog: [] }));
   };
 
-  const sendAllToSheet = async () => {
+  const sendAllToSheet = async (targetSheet?: string) => {
     if (inventory.length === 0) return;
-    if (!window.confirm(lang === 'ar' ? 'هل أنت متأكد من إرسال وحذف كافة السجلات؟' : 'Are you sure you want to send and delete all records?')) return;
     
     const loadingToast = toast.loading(translations[lang].sending);
     let successCount = 0;
+    const url = (targetSheet === STOCK_SHEET_NAME && STOCK_SHEET_URL) ? STOCK_SHEET_URL : SHEET_URL;
     
     // Process sequentially to be safe
     for (const item of inventory) {
       try {
-        await fetch(SHEET_URL, {
+        await fetch(url, {
           method: "POST",
           mode: 'no-cors',
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sku: item.sku,
             qty: item.qty,
             type: item.type,
             cost: item.cost || 0,
             sell: item.sell || 0,
-            date: item.date
+            date: item.date,
+            sheetName: targetSheet || "Main"
           })
         });
         successCount++;
@@ -194,7 +192,7 @@ export function useInventory() {
     toast.dismiss(loadingToast);
     if (successCount > 0) {
       setInventory([]);
-      addAuditEntry('SEND_ALL_TO_SHEET', `Sent ${successCount} items to cloud and cleared inventory`);
+      addAuditEntry('SEND_ALL_TO_SHEET', `Sent ${successCount} items to cloud (${targetSheet || "Main"}) and cleared inventory`);
       toast.success(translations[lang].saved_sent);
     } else {
       toast.error(translations[lang].err_send);
